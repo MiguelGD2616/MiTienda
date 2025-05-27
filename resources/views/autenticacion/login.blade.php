@@ -65,12 +65,11 @@
       </div>
       </div>
 
-      <a href="" class="d-block text-end">¿Olvidaste tu contraseña?</a>
+      <a href="{{ route('password.request') }}" class="d-block text-end">¿Olvidaste tu contraseña?</a>
       <input type="submit" class="btn btn-danger mt-3 w-100" value="ACCEDER">
     </form>
     </div>
 
   </div>
-
   <script src="{{ asset('js/main.js') }}"></script>
 @endsection
