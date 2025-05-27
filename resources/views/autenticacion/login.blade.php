@@ -7,7 +7,7 @@
   <script src="https://kit.fontawesome.com/a81368914c.js"></script>
 
   {{-- Estilos y scripts personalizados con Vite --}}
-  @vite(['resources/css/login.css', 'resources/js/main.js'])
+  @vite(['resources/css/login.css'])
 
   <!-- 🎥 Video de fondo solo en pantallas grandes -->
   <video autoplay loop muted playsinline controlslist="nodownload" class="video-background d-none d-lg-block">
