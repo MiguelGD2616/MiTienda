@@ -26,7 +26,7 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     @stack('estilos')
-    <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    @vite(['resources/css/welcome.css'])
 </head>
 
 <body>
