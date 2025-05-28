@@ -23,7 +23,7 @@
 
       {{-- Esta columna contendrá el formulario y se alineará a la derecha del spacer --}}
       <div class="login-form-column">
-          <div class="login-content p-4 shadow-lg rounded">
+          <div class="login-content p-4">
               <form action="{{ route('login.post') }}" method="POST">
                   @csrf
 

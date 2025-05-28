@@ -45,7 +45,7 @@
     @vite(['resources/css/adminlte.css'])
     <!--end::Required Plugin(AdminLTE)-->
     @stack('estilos')
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    @vite(['resources/css/style.css'])
   </head>
   <!--end::Head-->
   <!--begin::Body-->
