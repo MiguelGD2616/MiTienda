@@ -37,7 +37,7 @@
             </div>
 
             <!-- Seguridad -->
-            @canany(['user-list', 'rol-list'])
+            @canany(['user-list', 'rol-list','categoria-list'])
                 <div class="nav-item mt-3">
                     <a class="nav-link {{ $colorTexto }} d-flex justify-content-between align-items-center"
                         data-bs-toggle="collapse" href="#seguridadMenu" role="button"
@@ -60,10 +60,19 @@
                             </a>
                         @endcan
 
+                        @can('categoria-list')
                         <a href="{{ route('categorias.index') }}"
                             class="nav-link {{ request()->routeIs('categorias.index') ? 'active-item' : $colorTexto }}">
                             <i class="bi bi-tags me-2"></i> Categorías
                         </a>
+                        @endcan
+
+                        @can('permission-list')
+                            <a href="{{ route('permisos.index') }}"
+                                class="nav-link {{ request()->routeIs('permisos.index') ? 'active-item' : $colorTexto }}"> {{-- Usar permisos* para marcar activo en create/edit también --}}
+                                <i class="bi bi-key-fill me-2"></i> Permisos {{-- O el icono que prefieras, ej: fas fa-key --}}
+                            </a>
+                        @endcan
                     </div>
                 </div>
             @endcanany

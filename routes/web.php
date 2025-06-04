@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PerfilController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\PermissionController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,7 +39,7 @@ Route::middleware(['auth'])->group(function(){
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
-    Route::resource('categoriass',CategoriaController::class);
+    Route::resource('permisos', PermissionController::class)->except(['show']);
 });
 
 Route::middleware('guest')->group(function(){

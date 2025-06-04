@@ -19,9 +19,11 @@
                     </form>
                 </div>
                 <div class="col-md-6 text-end">
+                    @can('categoria-create')
                     <a href="{{ route('categorias.create') }}" class="btn btn-success">
                         <i class="bi bi-plus-lg"></i> Nueva Categoría
                     </a>
+                    @endcan
                 </div>
             </div>
 
@@ -54,10 +56,12 @@
                                         <td>{{ $reg->descripcion }}</td>
                                         <td class="text-center">
                                             <div class="btn-group">
+                                                
                                                 <a href="{{ route('categorias.edit', $reg->id) }}"
                                                     class="btn btn-sm btn-warning">
                                                     <i class="bi bi-pencil-fill"></i>
                                                 </a>
+                                                
                                                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
                                                     data-bs-target="#modal-delete-{{$reg->id}}">
                                                     <i class="bi bi-trash-fill text-white"></i>
