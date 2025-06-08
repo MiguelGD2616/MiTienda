@@ -57,14 +57,14 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
-            'imagen' => 'nullable|imagen|mimes:jpeg,png,jpg,gif|max:2048', // 2MB Max
+            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $productData = $request->except('imagen_url'); // Obtenemos todo menos el archivo
 
          if ($request->hasFile('imagen_url')) {
             // CORRECTO: Guardamos el archivo y obtenemos la ruta relativa
-            $path = $request->file('imagen_url')->store('products', 'public');
+            $path = $request->file('imagen_url')->store('productos', 'public');
             $productData['imagen_url'] = $path; // Guardamos la ruta (ej: "products/xyz.jpg")
         }
 
@@ -101,7 +101,7 @@ class ProductoController extends Controller
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
-            'imagen_url' => 'nullable|imagen|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
         
         $productData = $request->except('imagen_url');
