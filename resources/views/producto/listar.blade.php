@@ -108,7 +108,7 @@
             @forelse ($productos as $producto)
                 <div class="custom-card">
                     <div class="img-box">
-                        <img src="{{ cloudinary()->getImage($producto->imagen_url)->toUrl() }} : 'https://via.placeholder.com/300x220.png?text=Producto' }}" 
+                        <img src="{{ cloudinary()->image($producto->imagen_url)->toUrl() }} : 'https://via.placeholder.com/300x220.png?text=Producto' }}" 
                             alt="Imagen de {{ $producto->nombre }}">
                     </div>
                     <div class="custom-content">
