@@ -6,8 +6,6 @@
 
 body {
 	font-family: 'Poppins', sans-serif;
-	overflow-x: hidden;
-	overflow-y: auto;
 	color: #333;
 }
 
@@ -17,43 +15,23 @@ body {
 	left: 0;
 	min-width: 100%;
 	min-height: 100%;
-	width: auto;
-	height: auto;
 	object-fit: cover;
 	z-index: -1;
 }
 
-
+/* Contenedor principal para móvil */
 .login-page-container {
 	min-height: 100vh;
-	position: relative;
-	z-index: 1;
 	display: flex;
-	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 20px; 
-}
-
-.login-form-column {
-	width: 100%; 
-	display: flex;
-	justify-content: center; 
+	padding: 1rem;
 }
 
 .login-content {
-	width: 100%; 
-	max-width: 400px; 
 	text-align: left;
 }
-
-.login-content .title {
-    color: #333;
-}
-
-form {
-	width: 100%;
-}
+form { width: 100%; }
 
 .login-content .input-div {
 	position: relative;
@@ -61,106 +39,95 @@ form {
 	grid-template-columns: 10% 90%;
 	margin: 20px 0;
 	padding: 5px 0;
+	border-bottom: 2px solid #e0e0e0; 
 }
 
-.login-content .input-div.one {	
-	margin-top: 0; 
-}
-.i { color: #d9d9d9; display: flex; justify-content: center; align-items: center; }
+.i { color: #aaa; display: flex; justify-content: center; align-items: center; }
 .i i { transition: .3s; }
 .input-div > div { position: relative; height: 45px; }
-.input-div:before, .input-div:after { content: ''; position: absolute; bottom: -2px; width: 0%; height: 2px; background-color: #dc3545; transition: .4s; }
+.input-div:before, .input-div:after { content: ''; position: absolute; bottom: -2px; width: 0%; height: 2px; background-color: #0d6efd; transition: .4s; }
 .input-div:before { right: 50%; }
 .input-div:after { left: 50%; }
-.input-div.focus:before, .input-div.focus:after { width: 50%; }
-.input-div.focus > .i > i { color: #dc3545; }
+
+/* Ocultar borde base y cambiar color de icono al hacer foco */
+.input-div.focus { border-color: transparent; }
+.input-div.focus > .i > i { color: #0d6efd; }
 .input-div > div > input.input { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: none; outline: none; background: none; padding: 0.5rem 0.7rem; font-size: 1.1rem; color: #555; font-family: 'Poppins', sans-serif; }
 .input-div > div > input.input::placeholder { color: #999; }
-.input-div.pass { margin-bottom: 10px; }
-a { text-decoration: none; color: #999; font-size: 0.9rem; transition: .3s; }
-a:hover { color: #c82333;}
-.btn.btn-danger { height: 50px; border-radius: 25px; font-size: 1.2rem; text-transform: uppercase; transition: .5s; }
 
-
-/* ESTILOS PARA ESCRITORIO (lg y superior - 992px en adelante) */
-@media (min-width: 992px) {
-	body {
-		background-color: transparent !important;
-        background: none !important; 
-	}
-
+@media (min-width: 1430px) {
+	
 	.login-page-container {
-		flex-direction: row;
-		justify-content: flex-start;
-        align-items: stretch;
+		width: 100%;
+		max-width: none;
 		padding: 0;
-        background-color: transparent !important;
-        background: none !important;
+		flex-direction: row;
 	}
 
 	.left-video-spacer {
-		flex-basis: 98% !important; 
+		flex-grow: 1;
 		flex-shrink: 0;
+		flex-basis: 40;
+		
 	}
 
 	.login-form-column {
-		background-color: transparent !important;
-        background: none !important;
-		width: 100%; 
-		flex-grow: 1 !important; 
+		max-width: 450px;
+		flex-grow: 1; 
 		display: flex;
+		max-width: 800px;
+		margin-left: auto;
 		align-items: center;
 		justify-content: center;
-        padding: 0 20px; 
+        padding: 2rem;
 	}
 
-	.login-form-column > div.login-content.p-4.shadow-lg.rounded {
-		background-color: transparent !important;
-        background: none !important;
-	}
-}
-
-/* ESTILOS PARA MÓVIL (inferior a lg - 991.98px) */
-@media (max-width: 991.98px) {
-	body {
-		background-color: #f0f2f5; 
-	}
 	.login-content {
-		background-color: #fff !important;
+		width: 100%;
+		max-width: 450px;
 	}
-    .login-form-column {
-        background-color: transparent; 
-		box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.4),
-              0 6px 10px -2px rgba(0, 0, 0, 0.3);
-    }
-    .login-page-container {
-        padding: 20px;
-    }
-
 }
 
-/* Ajustes adicionales para pantallas muy pequeñas si es necesario */
-@media (max-width: 575.98px) {
+
+@media (min-width: 992px) and (max-width: 1429.98px) {
+	
+	.left-video-spacer {
+		display: none;
+	}
 
 	.login-form-column {
-		box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.4),
-              0 6px 10px -2px rgba(0, 0, 0, 0.3);
-    }
+		flex-basis: auto;
+		margin-left: 0;
+		width: 100%;
+		max-width: 500px;
+		padding: 2.5rem;
+		border-radius: 0.75rem;
+	}
 
-    .login-page-container {
-        padding: 15px;
+	.login-page-container {
+		justify-content: flex-end;
+	}
+
+}
+
+
+/*          ESTILOS PARA MÓVIL Y TABLET              */
+
+@media (max-width: 991.98px) {
+	body {
+		background-color: transparent;
+	}
+    .login-form-column {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
     }
-	.login-content {
-		padding: 20px; 
+    .login-content {
+		background-color: #fff;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 	}
-	.login-content .title {
-		font-size: 1.8rem;
-	}
-	.input-div > div > input.input {
-		font-size: 1rem;
-	}
-	.btn.btn-danger {
-		font-size: 1rem;
-		height: 45px;
-	}
+
+	
 }

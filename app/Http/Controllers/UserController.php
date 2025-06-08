@@ -111,4 +111,5 @@ class UserController extends Controller
         $usuario->save();
         return redirect()->route('usuarios.index')->with('mensaje', 'Estado del usuario actualizado correctamente.');
     }
+
 }

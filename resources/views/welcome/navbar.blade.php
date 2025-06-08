@@ -10,8 +10,8 @@
             <a href="{{ route('login') }}" class="nav-item nav-link">Login</a>
             <a href="{{ route('welcome') }}" class="nav-item nav-link {{ Route::is('welcome') 
             ? 'active-item' : '' }}"> Inicio </a>
-            <a href="{{ route('welcome') }}" class="nav-item nav-link {{ Route::is('') 
-            ? 'active-item' : '' }}"> Empieza a vender </a>
+            <a href="{{ route('registro') }}" class="nav-item nav-link {{ Route::is('') 
+            ? 'active-item' : '' }}"> Conviertete en vendedor </a>
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Categorías</a>
                 <div class="dropdown-menu text-capitalize">

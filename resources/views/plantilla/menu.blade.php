@@ -9,7 +9,7 @@
     $logoPath = asset('assets/img/bg1.png');
 
     // Si el rol es cliente
-    if ($user && $user->hasRole('cliente')) {
+    if ($user && $user->hasRole('Cafeteria')) {
         $colorFondo = 'rgb(88, 34, 4)'; // azul oscuro
         $colorTexto = 'text-light';
         $logoPath = asset('assets/img/coffe.png'); // Logo alternativo para cliente
@@ -71,6 +71,13 @@
                             <a href="{{ route('permisos.index') }}"
                                 class="nav-link {{ request()->routeIs('permisos.index') ? 'active-item' : $colorTexto }}"> {{-- Usar permisos* para marcar activo en create/edit también --}}
                                 <i class="bi bi-key-fill me-2"></i> Permisos {{-- O el icono que prefieras, ej: fas fa-key --}}
+                            </a>
+                        @endcan
+
+                        @can('producto-list')
+                            <a href="{{ route('productos.index') }}"
+                                class="nav-link {{ request()->routeIs('productos.index') ? 'active-item' : $colorTexto }}"> {{-- Usar permisos* para marcar activo en create/edit también --}}
+                                <i class="bi bi-key-fill me-2"></i> Productos {{-- O el icono que prefieras, ej: fas fa-key --}}
                             </a>
                         @endcan
                     </div>

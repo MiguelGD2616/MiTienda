@@ -2,6 +2,11 @@
 <html lang="en">
   <!--begin::Head-->
   <head>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>@yield('titulo', 'Sistema')</title>
     <!--begin::Primary Meta Tags-->

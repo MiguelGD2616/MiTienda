@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Categoria;
+use Illuminate\Support\Facades\Auth;
 
 class CategoriaController extends Controller
 {
@@ -13,7 +14,9 @@ class CategoriaController extends Controller
     public function index(Request $request)
     {
         $texto=$request->input('texto');
-        $registros= Categoria::where('nombre','like','%'.$texto.'%')->paginate(2);
+        $registros = Auth::User()->categoria()
+            ->where('nombre', 'like', '%'.$texto.'%')
+            ->paginate(10); // Aumenté la paginación a 10
         return view('categoria.index', compact('registros'));
     }
 
@@ -30,10 +33,13 @@ class CategoriaController extends Controller
      */
     public function store(Request $request)
     {
-        $registro = new Categoria();
-        $registro -> nombre= $request->input('nombre');
-        $registro ->descripcion=$request->input('descripcion');
-        $registro ->save();
+        
+
+        Auth::user()->categoria()->create([
+            'nombre' => $request->input('nombre'),
+            'descripcion' => $request->input('descripcion'),
+        ]);
+
         return redirect()->route('categorias.index')
         ->with('mensaje','Categoria registrada satisfactoriamente');
     }
@@ -51,7 +57,7 @@ class CategoriaController extends Controller
      */
     public function edit(string $id)
     {
-        $registros = Categoria::findOrFail($id);
+        $registros = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         return view('categoria.edit',compact('registros'));
     }
 
@@ -60,7 +66,7 @@ class CategoriaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $registro = Categoria::findOrFail($id);
+         $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $registro->nombre=$request->input('nombre');
         $registro->descripcion=$request->input('descripcion');
         $registro->save();
@@ -75,18 +81,17 @@ class CategoriaController extends Controller
      */
     public function destroy(string $id)
     {
-        $registro = Categoria::findOrFail($id);
+        $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $registro->delete();
         return redirect()->route('categorias.index')
         ->with('mensaje','Eliminado satisfactoriamente');
 
     }
 
-    public function listar(Request $request)
-{
+    public function listar(Request $request){
     
-    $texto = $request->input('texto');
-    $registros = Categoria::where('nombre', 'like', '%'.$texto.'%')->paginate(2);
-    return view('categoria.list', compact('registros'));
-}
+        $texto = $request->input('texto');
+        $registros = Categoria::where('nombre', 'like', '%'.$texto.'%')->paginate(2);
+        return view('categoria.list', compact('registros'));
+    }
 }

@@ -1,15 +1,12 @@
-
 @php
     use Illuminate\Support\Facades\Auth;
-
     $user = Auth::user();
-
     // Valores por defecto (admin)
     $colorFondo = '#8B0000'; // rojo oscuro
     $colorTexto = 'text-white';
 
     // Si el rol es cliente
-    if ($user && $user->hasRole('cliente')) {
+    if ($user && $user->hasRole('Cafeteria')) {
         $colorFondo = 'rgb(88, 34, 4)'; // tono café
         $colorTexto = 'text-light';
     }

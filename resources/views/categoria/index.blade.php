@@ -5,6 +5,22 @@
             <!-- Título -->
             <h2 class="mb-3">Listado de Categorías</h2>
 
+            {{-- MENSAJES FLASH --}}
+            @if (session('mensaje'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('mensaje') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            {{-- BLOQUE AÑADIDO PARA LA ADVERTENCIA --}}
+            @if (session('warning'))
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> {{-- Ícono de advertencia --}}
+                    {{ session('warning') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <!-- Fila: Buscar a la izquierda | Nueva Categoría a la derecha -->
             <div class="row mb-3 align-items-center">
                 <div class="col-md-6">

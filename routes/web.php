@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PerfilController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -20,8 +21,9 @@ Route::get('/soporte', function () {
 })->name('soporte');
 
 
-Route::resource('categorias', CategoriaController::class)->except(['show']);
+
 Route::get('/categorias/lista', [CategoriaController::class, 'listar'])->name('categorias.list');
+Route::get('/productos/lista', [ProductoController::class, 'listar'])->name('productos.listar');
 
 Route::middleware(['auth'])->group(function(){
     Route::resource('usuarios', UserController::class);
@@ -40,6 +42,8 @@ Route::middleware(['auth'])->group(function(){
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
     Route::resource('permisos', PermissionController::class)->except(['show']);
+    Route::resource('categorias', CategoriaController::class)->except(['show']);
+    Route::resource('productos', ProductoController::class)->except(['show']);
 });
 
 Route::middleware('guest')->group(function(){
@@ -56,5 +60,4 @@ Route::middleware('guest')->group(function(){
     Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('password/reset', [ResetPasswordController::class, 'resetPassword'])->name('password.update');
     
-
 });

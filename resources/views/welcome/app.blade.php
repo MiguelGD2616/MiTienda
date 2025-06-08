@@ -27,6 +27,7 @@
     <!-- Customized Bootstrap Stylesheet -->
     @stack('estilos')
     @vite(['resources/css/welcome.css'])
+    @stack('styles')
 </head>
 
 <body>

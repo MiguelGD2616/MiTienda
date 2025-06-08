@@ -14,7 +14,8 @@ use App\Http\Requests\UserRequest;
 class RegisterController extends Controller
 {
     public function showRegistroForm(){
-        return view('autenticacion.registro');
+        $roles = Role::all(); // Obtener todos los roles desde la base de datos
+        return view('autenticacion.registro', compact('roles'));
     }
 
     public function registrar(UserRequest $request){
@@ -22,14 +23,18 @@ class RegisterController extends Controller
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'password' => Hash::make($request->input('password')),
-            'activo' => 1, // Activar automáticamente
+            'activo' => 1,
         ]);
 
-        $clienteRol=Role::where('name','cliente')->first();
-        if($clienteRol){
-            $usuario->assignRole($clienteRol);
+        $categoria = $request->input('categoria');
+        $rolCategoria = Role::where('name', $categoria)->first();
+
+        if($rolCategoria){
+            $usuario->assignRole($rolCategoria);
         }
+
         Auth::login($usuario);
         return redirect()->route('dashboard')->with('mensaje', 'Registro exitoso. ¡Bienvenido!');
     }
+
 }
