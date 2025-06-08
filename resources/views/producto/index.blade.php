@@ -51,7 +51,7 @@
                                 {{-- Verificamos si el producto tiene una imagen guardada --}}
                                 @if ($producto->imagen_url)
                                     {{-- Usamos asset() para generar la URL pública --}}
-                                    <img src="{{ asset('storage/' . $producto->imagen_url) }}" 
+                                    <img src="{{ cloudinary()->image($producto->imagen_url)->toUrl() }}"
                                         alt="Imagen de {{ $producto->name }}" 
                                         width="60" 
                                         class="img-thumbnail">

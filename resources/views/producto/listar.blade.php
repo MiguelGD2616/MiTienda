@@ -99,8 +99,6 @@
 {{-- 4. Define el contenido principal que se inyectará en el @yield('contenido') --}}
 @section('contenido')
 <div class="container-contenido">
-
-        
         <div class="text-center mb-5">
             <h1 style="font-family: 'Poppins', sans-serif; font-weight: 900;">Explora Nuestros Productos</h1>
             <p class="text-muted">La mejor selección de productos, solo para ti.</p>
@@ -110,7 +108,7 @@
             @forelse ($productos as $producto)
                 <div class="custom-card">
                     <div class="img-box">
-                        <img src="{{ $producto->imagen_url ? asset('storage/' . $producto->imagen_url) : 'https://via.placeholder.com/300x220.png?text=Producto' }}" 
+                        <img src="{{ cloudinary()->getImage($producto->imagen_url)->toUrl() }} : 'https://via.placeholder.com/300x220.png?text=Producto' }}" 
                             alt="Imagen de {{ $producto->nombre }}">
                     </div>
                     <div class="custom-content">

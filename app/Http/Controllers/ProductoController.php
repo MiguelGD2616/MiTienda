@@ -62,10 +62,14 @@ class ProductoController extends Controller
 
         $productData = $request->except('imagen_url'); // Obtenemos todo menos el archivo
 
-         if ($request->hasFile('imagen_url')) {
-            // CORRECTO: Guardamos el archivo y obtenemos la ruta relativa
-            $path = $request->file('imagen_url')->store('productos', 'public');
-            $productData['imagen_url'] = $path; // Guardamos la ruta (ej: "products/xyz.jpg")
+        if ($request->hasFile('imagen_url')) {
+            // Subir la imagen a Cloudinary y obtener el Public ID
+            $uploadedFile = cloudinary()->uploadApi()->upload($request->file('imagen_url')->getRealPath(), [
+                'folder' => 'productos'
+            ]);
+            
+            // Guardamos el "Public ID" que nos da Cloudinary en la base de datos
+            $productData['imagen_url'] = $uploadedFile['public_id'];
         }
 
         Producto::create($productData);
@@ -107,13 +111,16 @@ class ProductoController extends Controller
         $productData = $request->except('imagen_url');
 
         if ($request->hasFile('imagen_url')) {
-        // Borramos la imagen antigua
+            // Borramos la imagen antigua de Cloudinary si existe
             if ($producto->imagen_url) {
-                Storage::disk('public')->delete($producto->imagen_url);
+                cloudinary()->uploadApi()->destroy($producto->imagen_url);
             }
-            // Guardamos la nueva y obtenemos la ruta
-            $path = $request->file('imagen_url')->store('products', 'public');
-            $productData['imagen_url'] = $path;
+            
+            // Subimos la nueva
+           $uploadedFile = cloudinary()->uploadApi()->upload($request->file('imagen_url')->getRealPath(), [
+                'folder' => 'productos'
+            ]);
+            $productData['imagen_url'] = $uploadedFile['public_id'];
         }
 
 
@@ -125,12 +132,13 @@ class ProductoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Producto $producto)
     {
-        $producto = Producto::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        
         // Borrar la imagen asociada
+        // Borramos la imagen de Cloudinary si existe
         if ($producto->imagen_url) {
-            Storage::disk('public')->delete($producto->imagen_url);
+            cloudinary()->uploadApi()->destroy($producto->imagen_url);
         }
 
         $producto->delete();

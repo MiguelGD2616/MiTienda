@@ -114,7 +114,7 @@ o valores antiguos (old) o vacíos si no (en la vista de creación).
             <div class="col-md-12 mb-3">
                 <label>Imagen Actual:</label><br>
                 <img 
-                    src="{{ asset('storage/' . $producto->imagen_url) }}" 
+                    src="{{ cloudinary()->image($producto->imagen_url)->toUrl() }}"
                     alt="{{ $producto->nombre }}" 
                     width="150" 
                     class="img-thumbnail">
