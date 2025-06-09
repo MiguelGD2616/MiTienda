@@ -41,16 +41,7 @@
                     </a>
                     @endcan
                 </div>
-            </div>
-
-            <!-- Mensaje de éxito -->
-            @if (session('mensaje'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('mensaje') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
+        </div>
             <!-- Tabla -->
             <div class="card shadow-sm">
                 <div class="card-body p-0">
