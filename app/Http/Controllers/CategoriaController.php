@@ -36,7 +36,7 @@ class CategoriaController extends Controller
     {
         
 
-        Auth::user()->categoria()->create([
+        Auth::user()->categorias()->create([
             'nombre' => $request->input('nombre'),
             'descripcion' => $request->input('descripcion'),
         ]);
