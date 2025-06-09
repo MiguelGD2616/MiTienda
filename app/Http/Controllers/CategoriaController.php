@@ -15,7 +15,7 @@ class CategoriaController extends Controller
     public function index(Request $request)
     {
         $texto=$request->input('texto');
-        $registros = Auth::User()->categoria()
+        $registros = Auth::User()->categorias()
             ->where('nombre', 'like', '%'.$texto.'%')
             ->paginate(10); // Aumenté la paginación a 10
         return view('categoria.index', compact('registros'));
