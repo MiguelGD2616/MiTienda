@@ -22,7 +22,7 @@
 
                   <div class="text-center mb-5">
                       <img src="{{ asset('assets/img/login.png') }}" alt="Logo" style="width: 70px;">
-                      <h3 class="fw-bold mt-3 mb-1">Bienvenido de Vuelta</h3>
+                      <h3 class="fw-bold mt-3 mb-1">Bienvenido</h3>
                       <p class="text-muted">Introduce tus credenciales para acceder.</p>
                   </div>
 

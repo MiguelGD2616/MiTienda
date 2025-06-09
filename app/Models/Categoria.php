@@ -29,4 +29,12 @@ class Categoria extends Model
             });
         }
     }
+
+    public function productos()
+    {
+        // El nombre de la relación es 'productos' (plural)
+        return $this->hasMany(Producto::class);
+    }
+
+
 }

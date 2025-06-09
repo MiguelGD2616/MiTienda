@@ -52,7 +52,13 @@ class User extends Authenticatable
         return $this->hasMany(Entrada::class);
     }
 
-    public function categoria(){
+    public function categorias(){
         return $this->hasMany(Categoria::class);
     }
+
+    public function productos()
+    {
+        return $this->hasManyThrough(Producto::class, Categoria::class);
+    }
+
 }

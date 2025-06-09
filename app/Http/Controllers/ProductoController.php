@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,10 +23,12 @@ class ProductoController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10);
 
+        
         $categoryCount = Categoria::count();
+        
+        $categorias = Categoria::orderBy('nombre')->get();
 
-
-        return view('producto.index', compact('productos', 'texto', 'categoryCount'));
+        return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
     }
 
     /**
@@ -155,4 +158,87 @@ class ProductoController extends Controller
         // Devolvemos la vista de la tienda pública
         return view('producto.listar', compact('productos'));
     }
+
+      public function listarPorCategoria(Categoria $categoria)
+    {
+        // Usamos la relación 'productos()' que definimos en el Paso 1
+        $productos = $categoria->productos()->orderBy('created_at', 'desc')->paginate(6);
+        
+        // Obtenemos todas las categorías para el menú de filtros
+        $categorias = Categoria::orderBy('nombre')->get();
+        
+        // Reutilizamos la misma vista, pero pasamos la categoría actual
+        return view('productos.index', [
+            'productos' => $productos,
+            'categorias' => $categorias,
+            'categoriaActual' => $categoria, // Pasamos la categoría seleccionada
+        ]);
+    }
+
+    public function mostrarProductosPublico(User $tienda_user)
+    {
+        // ESTA LÍNEA AHORA FUNCIONARÁ CORRECTAMENTE
+        // Usará la relación 'hasManyThrough' que definimos.
+        $productos = $tienda_user->productos()
+            ->orderBy('productos.created_at', 'desc') // Buena práctica: ser explícito con el nombre de la tabla
+            ->paginate(6);
+        
+        // Esta línea ya funcionaba, porque la relación User->Categorias es directa.
+        // La mejora de 'whereHas' sigue siendo válida y muy recomendable.
+        $categorias = $tienda_user->categorias()
+            ->whereHas('productos')
+            ->orderBy('nombre')
+            ->get();
+        
+        return view('tienda.index', [
+            'tienda_user' => $tienda_user,
+            'productos' => $productos,
+            'categorias' => $categorias,
+        ]);
+    }
+
+    public function filtrarPorCategoriaPublico(User $tienda_user, Categoria $categoria)
+    {
+        // Esta validación es CRUCIAL y ya estaba correcta.
+        // Verifica que la categoría pertenece al usuario de la tienda.
+        if ($categoria->user_id !== $tienda_user->id) {
+            abort(404);
+        }
+
+        // Esta parte no cambia, ya que obtiene los productos a partir de la categoría,
+        // lo cual es una relación directa.
+        $productos = $categoria->productos()
+            ->orderBy('created_at', 'desc')
+            ->paginate(6);
+        
+        $categorias = $tienda_user->categorias()
+            ->whereHas('productos')
+            ->orderBy('nombre')
+            ->get();
+        
+        return view('tienda.index', [
+            'tienda_user' => $tienda_user,
+            'productos' => $productos,
+            'categorias' => $categorias,
+            'categoriaActual' => $categoria,
+        ]);
+    }
+
+    public function buscarPublico(Request $request, User $tienda_user)
+    {
+        $request->validate([
+            'q' => 'required|string|min:1',
+        ]);
+
+        $terminoBusqueda = $request->input('q');
+
+        $categorias = $tienda_user->categorias()
+                                ->where('nombre', 'LIKE', '%' . $terminoBusqueda . '%')
+                                ->select('id', 'nombre')
+                                ->limit(10)
+                                ->get();
+        
+        return response()->json($categorias);
+    }
+    
 }

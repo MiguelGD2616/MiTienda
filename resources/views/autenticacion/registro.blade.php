@@ -59,7 +59,7 @@
               <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 <input id="password" type="password" name="password"
-                       class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 6 caracteres">
+                       class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 8 caracteres">
               </div>
               @error('password')
                 <div class="text-danger small mt-1">{{ $message }}</div>
@@ -81,12 +81,12 @@
 
             {{-- Rol (Tu campo original) --}}
             <div class="mb-4">
-              <label for="categoria" class="form-label">Rol de usuario</label>
+              <label for="categoria" class="form-label">Rubro</label>
               <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
                 <select id="categoria" name="categoria"
                         class="form-select @error('categoria') is-invalid @enderror" required>
-                  <option value="" disabled selected>Seleccione un rol</option>
+                  <option value="" disabled selected>Seleccione un Rubro</option>
                   @foreach ($roles as $rol)
                     @if (!in_array($rol->name, ['admin', 'cliente']))
                       <option value="{{ $rol->name }}" {{ old('categoria') == $rol->name ? 'selected' : '' }}>

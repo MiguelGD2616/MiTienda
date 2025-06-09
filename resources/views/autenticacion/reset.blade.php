@@ -1,71 +1,85 @@
 @extends('autenticacion.app')
-@section('titulo', 'Sistema - Cambiar Password')
+@section('titulo', 'Sistema - Restablecer Contraseña')
+
 @section('contenido')
-<div class="card card-outline card-primary">
-  <div class="card-header">
-    <a
-      href="/"
-      class="link-dark text-center link-offset-2 link-opacity-100 link-opacity-50-hover"
-    >
-      <h1 class="mb-0"><b>Sistema</b>LTE</h1>
-    </a>
+<div class="container my-4 mx-auto" style="max-width: 900px;">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0 text-center text-md-start">Restablecer la Contraseña</h4>
+    </div>
+    <div class="card-body">
+      {{-- COMIENZA LA ESTRUCTURA DE 2 COLUMNAS --}}
+      <div class="row g-4 align-items-center mt-3">
+
+        <!-- Columna de la imagen -->
+        <div class="col-12 col-md-4 text-center">
+          <img src="{{ asset('assets/img/usuario.gif') }}" alt="Icono de seguridad" class="img-fluid" style="max-height: 200px;">
+        </div>
+
+        <!-- Columna del formulario -->
+        <div class="col-12 col-md-8">
+          <p class="text-muted">
+            Por favor, confirma tu correo electrónico y elige una nueva contraseña.
+          </p>
+
+          <form action="{{ route('password.update') }}" method="POST">
+            @csrf
+            {{-- Este campo oculto es esencial para que el proceso funcione --}}
+            <input type="hidden" name="token" value="{{ $token }}">
+
+            {{-- Mensaje de error de sesión (si existe) --}}
+            @if(session('error'))
+              <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            {{-- Campo de Email (AHORA EDITABLE) --}}
+            <div class="mb-3">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                {{-- CAMBIO PRINCIPAL: Se ha quitado 'readonly' para que el campo sea editable --}}
+                <input id="email" type="email" name="email" value="{{ request()->email ?? old('email') }}"
+                       class="form-control @error('email') is-invalid @enderror" placeholder="Escribe tu correo electrónico" required>
+              </div>
+              @error('email')
+                <div class="text-danger small mt-1">{{ $message }}</div>
+              @enderror
+            </div>
+
+            {{-- Campo de Nueva Contraseña --}}
+            <div class="mb-3">
+              <label for="password" class="form-label">Nueva Contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input id="password" type="password" name="password"
+                       class="form-control @error('password') is-invalid @enderror" placeholder="Mínimo 8 caracteres" required>
+              </div>
+              @error('password')
+                <div class="text-danger small mt-1">{{ $message }}</div>
+              @enderror
+            </div>
+
+            {{-- Campo de Confirmar Contraseña --}}
+            <div class="mb-3">
+              <label for="password_confirmation" class="form-label">Confirmar nueva contraseña</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input id="password_confirmation" type="password" name="password_confirmation"
+                       class="form-control" placeholder="Repita la nueva contraseña" required>
+              </div>
+            </div>
+
+            {{-- Botón de Actualizar --}}
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Actualizar Contraseña
+              </button>
+            </div>
+          </form>
+          {{-- FIN DEL FORMULARIO --}}
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="card-body login-card-body">
-    <p class="login-box-msg">Cambiar password</p>
-    @if(session('error'))
-      <div class="alert alert-danger">
-        {{session('error')}}
-      </div>
-    @endif
-    <form action="{{route('password.update')}}" method="post">
-      @csrf
-      <input type="hidden" name="token" value="{{ $token }}">
-      <div class="input-group mb-1">
-        <div class="form-floating">
-          <input id="loginEmail" type="email" name="email" value="{{old('email')}}" class="form-control @error('email') is-invalid @enderror" placeholder="" />
-          <label for="loginEmail">Email</label>
-        </div>
-        <div class="input-group-text"><span class="bi bi-envelope"></span></div>
-        @error('email')
-          <div class="invalid-feedback d-block">{{ $message }}</div>
-        @enderror
-      </div>
-      <div class="input-group mb-1">
-        <div class="form-floating">
-          <input id="loginPassword" type="text" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="" />
-          <label for="loginPassword">Nuevo Password</label>
-        </div>
-        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
-        @error('password')
-          <div class="invalid-feedback d-block">{{ $message }}</div>
-        @enderror
-      </div>
-      <div class="input-group mb-1">
-        <div class="form-floating">
-          <input id="password_confirmation" type="text" name="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" placeholder="" />
-          <label for="password_confirmation">Confirme su nuevo password</label>
-        </div>
-        <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
-        @error('password_confirmation')
-          <div class="invalid-feedback d-block">{{ $message }}</div>
-        @enderror
-      </div>
-      <!--begin::Row-->
-      <div class="row">
-        <!-- /.col -->
-        <div class="col-4">
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Actualizar password</button>
-          </div>
-        </div>
-        <!-- /.col -->
-      </div>
-      <!--end::Row-->
-    </form>
-    <!-- /.social-auth-links -->
-  </div>
-  <!-- /.login-card-body -->
 </div>
 @endsection
-
-      

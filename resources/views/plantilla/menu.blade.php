@@ -80,6 +80,17 @@
                                 <i class="bi bi-key-fill me-2"></i> Productos {{-- O el icono que prefieras, ej: fas fa-key --}}
                             </a>
                         @endcan
+
+                        @can('tienda')
+                            <a href="{{ route('mostrarProductosPublico', auth()->user()) }}"
+                                class="nav-link {{ request()->routeIs('mostrarProductosPublico') ? 'active-item' : $colorTexto }}"> {{-- Usar permisos* para marcar activo en create/edit también --}}
+                                <i class="bi bi-shop me-2"></i> Ver Tienda {{-- O el icono que prefieras, ej: fas fa-key --}}
+                            </a>
+
+                            <a href="#" class="nav-link {{ request()->routeIs('#') ? 'active-item' : $colorTexto }}" data-bs-toggle="modal" data-bs-target="#shareLinkModal">
+                                <i class="bi bi-share-fill me-2"></i> Link de Tienda
+                            </a>
+                        @endcan
                     </div>
                 </div>
             @endcanany

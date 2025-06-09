@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Categoria;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class CategoriaController extends Controller
@@ -93,5 +94,23 @@ class CategoriaController extends Controller
         $texto = $request->input('texto');
         $registros = Categoria::where('nombre', 'like', '%'.$texto.'%')->paginate(2);
         return view('categoria.list', compact('registros'));
+    }
+
+    public function buscarPublico(Request $request, User $tienda_user)
+    {
+        $request->validate([
+            'q' => 'required|string|min:1',
+        ]);
+
+        $terminoBusqueda = $request->input('q');
+
+        // Iniciamos la consulta desde el usuario para buscar solo en SUS categorías.
+        $categorias = $tienda_user->categorias()
+                                ->where('nombre', 'LIKE', '%' . $terminoBusqueda . '%')
+                                ->select('id', 'nombre')
+                                ->limit(10)
+                                ->get();
+        
+        return response()->json($categorias);
     }
 }

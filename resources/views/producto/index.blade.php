@@ -3,7 +3,7 @@
 <main class="app-main">
     <div class="container-fluid mt-4">
         <h2 class="mb-3">Listado de Productos</h2>
-        @if ($categoryCount > 0)
+        @if (isset($categoryCount) && $categoryCount > 0)
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <form action="{{ route('productos.index') }}" method="GET">
@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                @if ($categoryCount > 0)
+                @if (isset($categoryCount) && $categoryCount > 0)
                     @forelse ($productos as $producto)
                         <tr>
                             <td>{{ $producto->id }}</td>

@@ -23,8 +23,14 @@ Route::get('/soporte', function () {
 
 
 Route::get('/categorias/lista', [CategoriaController::class, 'listar'])->name('categorias.list');
-Route::get('/productos/lista', [ProductoController::class, 'listar'])->name('productos.listar');
+Route::get('/{tienda_user:id}/tienda', [ProductoController::class, 'mostrarProductosPublico'])->name('mostrarProductosPublico');
 
+//Route::get('/tienda', [ProductoController::class, 'mostrarProductosPublico'])->name('mostrarProductosPublico');
+Route::get('/{tienda_user}/tienda/buscar', [ProductoController::class, 'buscarPublico'])->name('tienda.buscar');
+//Route::get('/api/buscar-categorias', [App\Http\Controllers\CategoriaController::class, 'buscarPublico'])->name('api.categorias.buscar');
+// Ruta para ver productos filtrados por categoría
+//Route::get('/tienda/categoria/{categoria}', [ProductoController::class, 'filtrarPorCategoriaPublico'])->name('productos.categoria');
+Route::get('/{tienda_user:id}/tienda/categoria/{categoria}', [ProductoController::class, 'filtrarPorCategoriaPublico'])->name('productos.categoria');
 Route::middleware(['auth'])->group(function(){
     Route::resource('usuarios', UserController::class);
     Route::patch('usuarios/{usuario}/toggle', [UserController::class, 'toggleStatus'])->name('usuarios.toggle');
