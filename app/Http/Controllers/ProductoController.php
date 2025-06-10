@@ -14,23 +14,31 @@ class ProductoController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
+{
+    $texto = $request->get('texto');
 
-        $texto = $request->get('texto');
-        
-        $productos = Producto::with('categoria')
-            ->where('nombre', 'LIKE', '%' . $texto . '%')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+    // Obtenemos el usuario autenticado
+    $userId = auth()->id();
 
-        
-        $categoryCount = Categoria::count();
-        
-        $categorias = Categoria::orderBy('nombre')->get();
+    // Filtramos productos que pertenezcan a categorías del usuario autenticado
+    $productos = Producto::with('categoria')
+        ->whereHas('categoria', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+        ->where('nombre', 'LIKE', '%' . $texto . '%')
+        ->orderBy('id', 'desc')
+        ->paginate(10);
 
-        return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
-    }
+    // Solo contamos categorías del usuario actual
+    $categoryCount = Categoria::where('user_id', $userId)->count();
 
+    $categorias = Categoria::where('user_id', $userId)
+                        ->orderBy('nombre')
+                        ->get();
+
+    return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
+}
+    
     /**
      * Show the form for creating a new resource.
      */
