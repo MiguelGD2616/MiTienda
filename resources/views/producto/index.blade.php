@@ -61,7 +61,7 @@
                                 @endif
                             </td>
                             <td>{{ $producto->nombre }}</td>
-                            <td>{{ $producto->categoria->nombre }}</td>
+                            <td>{{ $producto->categorias->nombre }}</td>
                             <td>S/.{{ number_format($producto->precio, 2) }}</td>
                             <td>{{ $producto->stock }}</td>
                             <td class="text-center">
