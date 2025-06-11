@@ -41,8 +41,12 @@
                     </a>
                     @endcan
                 </div>
+<<<<<<< HEAD
             </div>
 
+=======
+        </div>
+>>>>>>> be606a4f5aa807436615a2fe1ce21efac3d2d22d
             <!-- Tabla -->
             <div class="card shadow-sm">
                 <div class="card-body p-0">
