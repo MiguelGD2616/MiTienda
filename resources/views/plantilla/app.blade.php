@@ -6,10 +6,15 @@
     <title>Sistema</title>
     <!--begin::Primary Meta Tags-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="title" content="Sistema | IncanatoApps.com" />
+    <meta name="title" content="Sistema" />
     <meta name="author" content="IncanatoApps" />
     <meta name="description" content="Sistema." />
-    <meta name="keywords" content="Sistema, IncanatoApps" />
+    <meta name="keywords" content="Sistema" />
+
+  <!-- Font Awesome 6 (versión free) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+
     <!--end::Primary Meta Tags-->
     <!--begin::Fonts-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" />
@@ -24,7 +29,7 @@
     @vite(['resources/css/adminlte.css'])
     <!--end::Required Plugin(AdminLTE)-->
     @stack('estilos')
-    @vite(['resources/css/style.css'])
+
   </head>
   <!--end::Head-->
   <!--begin::Body-->
@@ -52,7 +57,7 @@
       <!--begin::Footer-->
       <footer class="app-footer">
         <div class="float-end d-none d-sm-inline">Anything you want</div>
-        <strong>Copyright © 2025 <a href="#" class="text-decoration-none">Incanatoapps</a>.</strong>
+        <strong>Copyright © 2025 <a href="#" class="text-decoration-none"></a>.</strong>
         All rights reserved.
       </footer>
       <!--end::Footer-->

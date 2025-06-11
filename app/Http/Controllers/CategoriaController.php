@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Categoria;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class CategoriaController extends Controller
 {
@@ -15,7 +16,7 @@ class CategoriaController extends Controller
     public function index(Request $request)
     {
         $texto=$request->input('texto');
-        $registros = Auth::User()->categoria()
+        $registros = Auth::User()->categorias()
             ->where('nombre', 'like', '%'.$texto.'%')
             ->paginate(10); // Aumenté la paginación a 10
         return view('categoria.index', compact('registros'));
@@ -35,8 +36,22 @@ class CategoriaController extends Controller
     public function store(Request $request)
     {
         
+        $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:50',
+                // Categoria unica
+                Rule::unique('categorias')->where('user_id', Auth::id()),
+            ],
+            'descripcion' => 'nullable|string|max:255',
+        ], [
+            // Mensajes de error p
+            'nombre.required' => 'El campo nombre es obligatorio.',
+            'nombre.unique' => 'Ya tienes una categoría con este nombre.',
+        ]);
 
-        Auth::user()->categoria()->create([
+        Auth::user()->categorias()->create([
             'nombre' => $request->input('nombre'),
             'descripcion' => $request->input('descripcion'),
         ]);
@@ -67,7 +82,23 @@ class CategoriaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-         $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:50',
+                // La regla clave para actualizar:
+                // Debe ser único, PERO ignorando la propia categoría que estamos editando.
+                Rule::unique('categorias')->where('user_id', Auth::id())->ignore($registro->id),
+            ],
+            'descripcion' => 'nullable|string|max:255',
+        ], [
+            'nombre.required' => 'El campo nombre es obligatorio.',
+            'nombre.unique' => 'Ya tienes otra categoría con este nombre.',
+        ]);
+
         $registro->nombre=$request->input('nombre');
         $registro->descripcion=$request->input('descripcion');
         $registro->save();

@@ -50,7 +50,7 @@
                 </div>
                 <div class="custom-content">
                     <h2>{{ $producto->nombre }}</h2>
-                    <div class="price">${{ number_format($producto->precio, 2) }}</div>
+                    <div class="price">S/.{{ number_format($producto->precio, 2) }}</div>
                     <a href="#">Ver Detalles</a>
                 </div>
             </div>
@@ -75,17 +75,14 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Definimos la URL base para los enlaces de los resultados aquí
-    // Esto es más limpio y fácil de mantener.
-    // La ruta 'productos.categoria' necesita un placeholder para el ID de la categoría que reemplazaremos luego.
-    // Usamos un placeholder único como '__ID__'
+
     const categoriaUrlTemplate = "{{ route('productos.categoria', ['tienda_user' => $tienda_user, 'categoria' => '__ID__']) }}";
 
     $('#buscador-categoria').on('keyup', function() {
         let query = $(this).val();
         let resultadosDiv = $('#resultados-categorias');
         
-        // <-- CORRECCIÓN 2: Obtener la URL de búsqueda desde el atributo data-* del input
+
         let searchUrl = $(this).data('search-url');
 
         if (query.length < 2) {
@@ -94,7 +91,7 @@ $(document).ready(function() {
         }
 
         $.ajax({
-            url: searchUrl, // <-- CORRECCIÓN 3: Usar la URL dinámica
+            url: searchUrl,
             type: "GET",
             data: { 'q': query },
             success: function(data) {

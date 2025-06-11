@@ -17,16 +17,21 @@ class ProductoController extends Controller
     {
 
         $texto = $request->get('texto');
-        
+        $userId = auth()->id();
+        // Filtramos productos que pertenezcan a categorías del usuario autenticadoAdd commentMore actions
         $productos = Producto::with('categoria')
+            ->whereHas('categoria', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
             ->where('nombre', 'LIKE', '%' . $texto . '%')
             ->orderBy('id', 'desc')
             ->paginate(10);
-
         
-        $categoryCount = Categoria::count();
+        $categoryCount = Categoria::where('user_id', $userId)->count();
+        $categorias = Categoria::where('user_id', $userId)
+            ->orderBy('nombre')
+            ->get();
         
-        $categorias = Categoria::orderBy('nombre')->get();
 
         return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
     }
