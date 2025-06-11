@@ -15,27 +15,7 @@ class ProductoController extends Controller
      */
     public function index(Request $request)
 {
-    $texto = $request->get('texto');
-
-<<<<<<< HEAD
-        $texto = $request->get('texto');
-        $userId = auth()->id();
-        // Filtramos productos que pertenezcan a categorías del usuario autenticadoAdd commentMore actions
-        $productos = Producto::with('categoria')
-            ->whereHas('categoria', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->where('nombre', 'LIKE', '%' . $texto . '%')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
-        
-        $categoryCount = Categoria::where('user_id', $userId)->count();
-        $categorias = Categoria::where('user_id', $userId)
-            ->orderBy('nombre')
-            ->get();
-        
-=======
-    // Obtenemos el usuario autenticado
+    $texto = $request->get('texto'); // Solo una vez
     $userId = auth()->id();
 
     // Filtramos productos que pertenezcan a categorías del usuario autenticado
@@ -46,18 +26,15 @@ class ProductoController extends Controller
         ->where('nombre', 'LIKE', '%' . $texto . '%')
         ->orderBy('id', 'desc')
         ->paginate(10);
->>>>>>> be606a4f5aa807436615a2fe1ce21efac3d2d22d
-
-    // Solo contamos categorías del usuario actual
-    $categoryCount = Categoria::where('user_id', $userId)->count();
-
-    $categorias = Categoria::where('user_id', $userId)
-                        ->orderBy('nombre')
-                        ->get();
-
-    return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
-}
     
+    // Contamos categorías y las obtenemos para la vista
+    $categoryCount = Categoria::where('user_id', $userId)->count();
+    $categorias = Categoria::where('user_id', $userId)
+        ->orderBy('nombre')
+        ->get();
+    
+    return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
+    } 
     /**
      * Show the form for creating a new resource.
      */

@@ -84,7 +84,7 @@
                     </div>
                     <div class="card-body p-4">
                         <div class="text-center mb-3">
-                            <img src="{{ asset('assets/img/illustrations/organize_items.svg') }}" 
+                            <img src="{{ asset('assets/img/empresa.gif') }}" 
                                  class="img-fluid" 
                                  alt="Ilustración de organización" 
                                  style="max-height: 150px;">

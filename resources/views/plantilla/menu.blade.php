@@ -4,7 +4,7 @@
     $user = Auth::user();
 
     // Colores y logo por defecto (admin)
-    $colorFondo = '#6076e5';
+    $colorFondo = '#00406d';
     $colorTexto = 'text-white';
     $logoPath = asset('assets/img/MiTienda.png');
 
