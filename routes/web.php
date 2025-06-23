@@ -33,7 +33,7 @@ Route::get('/soporte', function () {
 // ----------------------------
 Route::get('/categorias/lista', [CategoriaController::class, 'listar'])->middleware([RedirectAdminsFromWelcome::class])->name('categorias.list');
 // Rutas de la tienda pública
-Route::middleware('auth')->post('/carrito/agregar/{producto}', [CartController::class, 'add'])->name('cart.add');   
+// Route::middleware('auth')->post('/carrito/agregar/{producto}', [CartController::class, 'add'])->name('cart.add');   
 Route::middleware([RememberStoreUrl::class])->group(function () {
     Route::get('/tienda/{empresa:slug}', [ProductoController::class, 'mostrarTienda'])->name('tienda.public.index');
     Route::get('/tienda/{empresa:slug}/categoria/{categoria}', [ProductoController::class, 'filtrarPorCategoria'])->name('tienda.public.categoria');
