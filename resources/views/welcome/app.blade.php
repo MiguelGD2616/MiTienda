@@ -8,6 +8,7 @@
     <meta content="Free Website Template" name="keywords">
     <meta content="Free Website Template" name="description">
 
+    
     <!-- Favicon -->
     <link href="{{asset('assets/img/ventas.png')}}" rel="icon">
 
@@ -18,17 +19,24 @@
         rel="stylesheet">
 
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
 
+    <script src="//unpkg.com/alpinejs" defer></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- Customized Bootstrap Stylesheet -->
+
     @stack('estilos')
     @vite(['resources/css/welcome.css'])
     @stack('styles')
 
+    
     @push('scripts')
     <script>
         // Nos aseguramos de que el DOM esté completamente cargado
@@ -62,41 +70,10 @@
         });
     </script>
     @endpush
-    
-    {{-- Modal para Compartir Enlace de la Tienda --}}
-    @auth {{-- Solo lo creamos si el usuario está logueado --}}
-    <div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLinkModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="shareLinkModalLabel">
-            <i class="bi bi-share-fill me-2"></i> ¡Comparte tu Tienda!
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <p>Este es el enlace público a tu tienda. Cópialo y compártelo con tus clientes en redes sociales, WhatsApp, etc.</p>
-            
-            <div class="input-group">
-                {{-- Usamos un input de solo lectura para mostrar el enlace --}}
-                <input type="text" class="form-control" 
-                    value="{{ route('mostrarProductosPublico', auth()->user()) }}" 
-                    id="storeLinkInput" readonly>
-                
-                {{-- El botón que copiará el texto --}}
-                <button class="btn btn-primary" type="button" id="copyLinkBtn">
-                    <i class="bi bi-clipboard me-1"></i> Copiar
-                </button>
-            </div>
 
-        </div>
-        </div>
-    </div>
-    </div>
-    @endauth
 </head>
 
-<body>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <!-- Navbar Start -->
         <div class="container-fluid p-0 nav-bar">
@@ -104,7 +81,11 @@
         </div>
         <!-- Navbar End -->
         <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid"></div>
+            </div>
             @yield('contenido')
+
         </main>
     </div>
     
@@ -122,6 +103,10 @@
     <script src="mail/jqBootstrapValidation.min.js"></script>
     <script src="mail/contact.js"></script>
     @stack('scripts')
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    
+       
 </body>
 
 </html>

@@ -44,6 +44,9 @@
                                 <th class="text-center" style="width: 60px;">ID</th>
                                 <th>Nombre</th>
                                 <th>Email</th>
+                                @if(auth()->user()->hasRole('super_admin'))
+                                    <th>Empresa</th>
+                                @endif
                                 <th>Rol</th>
                                 <th class="text-center">Estado</th>
                                 <th class="text-center" style="width: 180px;">Acciones</th>
@@ -60,6 +63,11 @@
                                     </div>
                                 </td>
                                 <td>{{ $reg->email }}</td>
+                                @if(auth()->user()->hasRole('super_admin'))
+                                    <td>
+                                        <span class="badge bg-info-subtle text-info-emphasis fw-normal">{{ $reg->empresa->nombre ?? 'Sin empresa' }}</span>
+                                    </td>
+                                @endif
                                 <td>
                                     @forelse ($reg->roles as $role)
                                         <span class="badge rounded-pill bg-primary fw-normal">{{ $role->name }}</span>
@@ -102,7 +110,7 @@
                             @endcan
                             @empty
                             <tr>
-                                <td colspan="6">
+                                <td colspan="{{ auth()->user()->hasRole('super_admin') ? '7' : '6' }}">
                                     <div class="text-center p-5">
                                         <i class="fa-solid fa-users-slash fa-3x text-muted mb-3"></i>
                                         <p class="mb-0 text-muted">No se encontraron usuarios que coincidan con la búsqueda.</p>

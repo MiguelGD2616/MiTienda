@@ -2,146 +2,128 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Categoria;
-use App\Models\User;
+use App\Models\Empresa; // 1. Importar Empresa para la vista de Super Admin
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CategoriaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
+    use AuthorizesRequests;
+
     public function index(Request $request)
     {
-        $texto=$request->input('texto');
-        $registros = Auth::User()->categorias()
-            ->where('nombre', 'like', '%'.$texto.'%')
-            ->paginate(10); // Aumenté la paginación a 10
-        return view('categoria.index', compact('registros'));
+        $this->authorize('categoria-list');
+        $user = Auth::user();
+        $texto = $request->input('texto');
+        $query = Categoria::with('empresa');
+
+        if (!$user->hasRole('super_admin')) {
+            $query->where('empresa_id', $user->empresa_id);
+        }
+
+        if ($texto) {
+            $query->where('nombre', 'like', '%' . $texto . '%');
+        }
+
+        $registros = $query->orderBy('nombre', 'asc')->paginate(10);
+        $empresas = $user->hasRole('super_admin') ? Empresa::all() : collect();
+
+        return view('categorias.index', compact('registros', 'empresas', 'texto'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view ('categoria.create');
+        $this->authorize('categoria-create'); // Autorización añadida
+        $empresas = auth()->user()->hasRole('super_admin') ? Empresa::all() : collect();
+        return view('categorias.action', compact('empresas'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $this->authorize('categoria-create');
+        $user = Auth::user();
+
+        // Para Super Admin, se requiere seleccionar una empresa
+        if ($user->hasRole('super_admin')) {
+             $request->validate(['empresa_id' => 'required|exists:empresas,id']);
+             $empresa_id = $request->empresa_id;
+        } else {
+             $empresa_id = $user->empresa_id;
+             if (!$empresa_id) {
+                return back()->with('error', 'No tienes una empresa asignada para crear categorías.');
+            }
+        }
         
         $request->validate([
-            'nombre' => [
-                'required',
-                'string',
-                'max:50',
-                // Categoria unica
-                Rule::unique('categorias')->where('user_id', Auth::id()),
-            ],
+            'nombre' => ['required', 'string', 'max:50', Rule::unique('categorias')->where('empresa_id', $empresa_id)],
             'descripcion' => 'nullable|string|max:255',
-        ], [
-            // Mensajes de error p
-            'nombre.required' => 'El campo nombre es obligatorio.',
-            'nombre.unique' => 'Ya tienes una categoría con este nombre.',
         ]);
 
-        Auth::user()->categorias()->create([
-            'nombre' => $request->input('nombre'),
-            'descripcion' => $request->input('descripcion'),
+        Categoria::create([
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
+            'empresa_id' => $empresa_id,
         ]);
 
-        return redirect()->route('categorias.index')
-        ->with('mensaje','Categoria registrada satisfactoriamente');
+        return redirect()->route('categorias.index')->with('mensaje', 'Categoría registrada satisfactoriamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Categoria $categoria)
     {
-        //
+        $this->authorize('categoria-edit', $categoria);
+        $empresas = auth()->user()->hasRole('super_admin') ? Empresa::all() : collect();
+        return view('categorias.action', ['registro' => $categoria, 'empresas' => $empresas]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, Categoria $categoria)
     {
-        $registros = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        return view('categoria.edit',compact('registros'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $this->authorize('categoria-edit', $categoria);
+        $empresa_id = $categoria->empresa_id;
 
         $request->validate([
-            'nombre' => [
-                'required',
-                'string',
-                'max:50',
-                // La regla clave para actualizar:
-                // Debe ser único, PERO ignorando la propia categoría que estamos editando.
-                Rule::unique('categorias')->where('user_id', Auth::id())->ignore($registro->id),
-            ],
+            'nombre' => ['required', 'string', 'max:50', Rule::unique('categorias')->where('empresa_id', $empresa_id)->ignore($categoria->id)],
             'descripcion' => 'nullable|string|max:255',
-        ], [
-            'nombre.required' => 'El campo nombre es obligatorio.',
-            'nombre.unique' => 'Ya tienes otra categoría con este nombre.',
         ]);
 
-        $registro->nombre=$request->input('nombre');
-        $registro->descripcion=$request->input('descripcion');
-        $registro->save();
-        return redirect()->route('categorias.index')
-        ->with('mensaje','Registro actualizado satisfactoriamente');
+        $categoria->update($request->only(['nombre', 'descripcion']));
 
-
+        return redirect()->route('categorias.index')->with('mensaje', 'Categoría actualizada satisfactoriamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Categoria $categoria)
     {
-        $registro = Categoria::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        $registro->delete();
-        return redirect()->route('categorias.index')
-        ->with('mensaje','Eliminado satisfactoriamente');
-
+        $this->authorize('categoria-delete', $categoria);
+        $nombreCategoria = $categoria->nombre;
+        // Lógica para comprobar si la categoría está en uso antes de borrar
+        if ($categoria->productos()->exists()) {
+            return redirect()->route('categorias.index')->with('warning', 'No se puede eliminar la categoría "'.$nombreCategoria.'" porque tiene productos asociados.');
+        }
+        $categoria->delete();
+        return redirect()->route('categorias.index')->with('mensaje', 'Categoría "' . $nombreCategoria . '" eliminada.');
     }
 
-    public function listar(Request $request){
-    
+    public function listar(Request $request)
+    {
         $texto = $request->input('texto');
-        $registros = Categoria::where('nombre', 'like', '%'.$texto.'%')->paginate(2);
+        $registros = Categoria::where('nombre', 'like', '%' . $texto . '%')->paginate(2);
         return view('categoria.list', compact('registros'));
     }
 
-    public function buscarPublico(Request $request, User $tienda_user)
+    public function buscarPublico(Request $request, Empresa $empresa)
     {
-        $request->validate([
-            'q' => 'required|string|min:1',
-        ]);
+        $request->validate(['q' => 'required|string|min:1']);
+        $termino = $request->input('q');
 
-        $terminoBusqueda = $request->input('q');
+        $categorias = $empresa->categorias()
+                            ->where('nombre', 'LIKE', '%' . $termino . '%')
+                            ->select('id', 'nombre')
+                            ->limit(10)
+                            ->get();
 
-        // Iniciamos la consulta desde el usuario para buscar solo en SUS categorías.
-        $categorias = $tienda_user->categorias()
-                                ->where('nombre', 'LIKE', '%' . $terminoBusqueda . '%')
-                                ->select('id', 'nombre')
-                                ->limit(10)
-                                ->get();
-        
         return response()->json($categorias);
     }
 }

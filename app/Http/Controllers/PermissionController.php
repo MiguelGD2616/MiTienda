@@ -21,14 +21,14 @@ class PermissionController extends Controller
         $texto = $request->input('texto');
         $registros = Permission::where('name', 'like', "%{$texto}%")
             ->orderBy('name', 'asc')
-            ->paginate(10); // Puedes ajustar la paginación
+            ->paginate(12); // Puedes ajustar la paginación
 
         return view('permission.index', compact('registros', 'texto'));
     }
 
     public function create()
     {
-        return view('permission.create');
+        return view('permission.action');
     }
 
     public function store(Request $request)
@@ -56,7 +56,7 @@ class PermissionController extends Controller
     public function edit(Permission $permiso) // Route Model Binding
     {
         $registro = $permiso;
-        return view('permission.edit', compact('registro'));
+        return view('permission.action', compact('registro'));
     }
 
     public function update(Request $request, Permission $permiso)

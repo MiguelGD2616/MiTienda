@@ -1,111 +1,149 @@
 @extends('plantilla.app')
+@section('titulo', 'Gestión de Roles')
+
 @section('contenido')
-    <main class="app-main">
-        <div class="container-fluid mt-4">
-            <!-- Título -->
-            <h2 class="mb-3">Listado de Roles</h2>
+<main class="app-main">
+    <div class="container-fluid mt-4">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3 mb-0 text-gray-800">
+                <i class="fa-solid fa-user-shield me-2"></i>
+                Gestión de Roles y Permisos
+            </h2>
+            @can('rol-create')
+                <a href="{{ route('roles.create') }}" class="btn btn-success shadow-sm">
+                    <i class="fa-solid fa-plus me-1"></i> Nuevo Rol
+                </a>
+            @endcan
+        </div>
 
-            <!-- Fila: Buscar a la izquierda | Nuevo Rol a la derecha -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
-                    <form action="{{ route('roles.index') }}" method="GET">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="texto" placeholder="Buscar rol..."
-                                value="{{ request('texto') }}">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search"></i> Buscar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-6 text-end">
-                    @can('rol-create')
-                        <a href="{{ route('roles.create') }}" class="btn btn-success">
-                            <i class="bi bi-plus-lg"></i> Nuevo Rol
-                        </a>
-                    @endcan
-                </div>
+        {{-- Mensaje de éxito --}}
+        @if (Session::has('mensaje'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                {{ Session::get('mensaje') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-
-            <!-- Mensaje de éxito -->
-            @if (Session::has('mensaje'))
-                <div class="alert alert-info alert-dismissible fade show">
-                    {{ Session::get('mensaje') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-
-            <!-- Tabla de roles -->
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="table-responsive mt-2">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th style="width: 20px">ID</th>
-                                    <th>Nombre</th>
-                                    <th>Permisos</th>
-                                    <th style="width: 150px" class="text-center">Opciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(count($registros) <= 0)
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">No hay registros que coincidan con la
-                                            búsqueda</td>
-                                    </tr>
-                                @else
-                                    @foreach($registros as $reg)
-                                        <tr class="align-middle">
-                                            <td>{{ $reg->id }}</td>
-                                            <td>{{ $reg->name }}</td>
-                                            <td>
-                                                @if($reg->permissions->isNotEmpty())
-                                                                            {!! $reg->permissions->pluck('name')->map(function ($name) {
-                                                        return "<span class='badge bg-primary me-1'>$name</span>";
-                                                    })->implode(' ') !!}
-                                                @else
-                                                    <span class="badge bg-secondary">Sin permisos</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="btn-group">
-                                                    @can('rol-edit')
-                                                        <a href="{{ route('roles.edit', $reg->id) }}" class="btn btn-info btn-sm">
-                                                            <i class="bi bi-pencil-fill"></i>
-                                                        </a>
-                                                    @endcan
-                                                    @can('rol-delete')
-                                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                                            data-bs-target="#modal-eliminar-{{ $reg->id }}">
-                                                            <i class="bi bi-trash-fill"></i>
-                                                        </button>
-                                                    @endcan
-                                                </div>
-
-                                            </td>
-                                        </tr>
-                                        @can('rol-delete')
-                                            @include('role.delete')
-                                        @endcan
-                                    @endforeach
-                                @endif
-                            </tbody>
-
-                        </table>
+        @endif
+        
+        {{-- Barra de búsqueda --}}
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-3">
+                <form action="{{ route('roles.index') }}" method="GET">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="texto" placeholder="Buscar por nombre del rol..." value="{{ request('texto') }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Buscar
+                        </button>
                     </div>
-                </div>
-                <div class="card-footer text-end">
-                    {{ $registros->appends(['texto' => request('texto')])->links() }}
-                </div>
+                </form>
             </div>
         </div>
-    </main>
+
+        {{-- Contenedor de las tarjetas de roles --}}
+        <div class="row">
+            @forelse($registros as $reg)
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm border-start-primary">
+                        <div class="card-body d-flex flex-column">
+                            {{-- Cabecera de la tarjeta --}}
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title text-primary">{{ $reg->name }} </h5>
+                                    <br>
+                                    <small class="text-muted"> ID: {{ $reg->id }} | {{ $reg->permissions->count() }} permisos</small>
+                                </div>
+                                <div class="btn-group">
+                                    @can('rol-edit')
+                                        <a href="{{ route('roles.edit', $reg->id) }}" class="btn btn-sm btn-outline-info" title="Editar">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </a>
+                                    @endcan
+                                    @can('rol-delete')
+                                        @if($reg->name != 'super_admin')
+                                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#modal-eliminar-{{ $reg->id }}" title="Eliminar">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                        @endif
+                                    @endcan
+                                </div>
+                            </div>
+                            <hr>
+
+                            @if($reg->permissions->isNotEmpty())
+                                @php
+                                    $groupedPermissions = $reg->permissions->groupBy(function($item) {
+                                        return explode('-', $item->name)[0];
+                                    });
+                                @endphp
+                                
+                                @foreach($groupedPermissions as $group => $permissions)
+                                <div class="mb-2">
+                                    <strong class="text-muted">{{ $group }}:</strong>
+                                    <div class="d-flex flex-wrap mt-1">
+                                        @foreach($permissions as $permission)
+                                            <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill me-1 mb-1">
+                                                @php
+                                                    $parts = explode('-', $permission->name, 2);
+                                                    $displayName = isset($parts[1]) ? $parts[1] : $parts[0];
+                                                @endphp
+                                                {{ $displayName }}
+                                                
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                            @else
+                                <div class="text-center text-muted p-3">
+                                    <i class="fa-solid fa-key-skeleton d-block mb-2 fs-4"></i>
+                                    <span>Sin permisos asignados</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                {{-- Se incluye el modal de eliminación para cada rol --}}
+                @can('rol-delete')
+                    @include('role.delete')
+                @endcan
+            @empty
+                <div class="col-12">
+                    <div class="text-center p-5 bg-white rounded shadow-sm">
+                        <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="mb-0 text-muted">No se encontraron roles que coincidan con la búsqueda.</p>
+                    </div>
+                </div>
+            @endforelse
+        </div>
+        
+        {{-- Paginación --}}
+        @if ($registros->hasPages())
+        <div class="d-flex justify-content-center mt-4">
+            {{ $registros->appends(['texto' => request('texto')])->links() }}
+        </div>
+        @endif
+    </div>
+</main>
 @endsection
 
+@push('estilos')
+<style>
+    .card.border-start-primary {
+        border-left: 4px solid var(--bs-primary);
+        transition: all 0.2s ease-in-out;
+    }
+    .card.border-start-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
+@endpush
+
 @push('scripts')
-    <script>
-        document.getElementById('mnuSeguridad').classList.add('menu-open');
-        document.getElementById('itemRole').classList.add('active');
-    </script>
+<script>
+    document.getElementById('mnuSeguridad').classList.add('menu-open');
+    document.getElementById('itemRole').classList.add('active');
+</script>
 @endpush

@@ -19,7 +19,9 @@
               
               <form action="{{ route('login.post') }}" method="POST">
                   @csrf
-
+                  @if(request()->has('redirect'))
+                      <input type="hidden" name="redirect" value="{{ request()->query('redirect') }}">
+                  @endif
                   <div class="text-center mb-5">
                       <img src="{{ asset('assets/img/login.png') }}" alt="Logo" style="width: 70px;">
                       <h3 class="fw-bold mt-3 mb-1">Bienvenido</h3>

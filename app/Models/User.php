@@ -1,64 +1,67 @@
 <?php
 
-namespace App\Models;
+    namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
+    // use Illuminate\Contracts\Auth\MustVerifyEmail;
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
+    use Illuminate\Foundation\Auth\User as Authenticatable;
+    use Illuminate\Notifications\Notifiable;
+    use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
-{
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'activo'
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    class User extends Authenticatable
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+        /** @use HasFactory<\Database\Factories\UserFactory> */
+        use HasFactory, Notifiable, HasRoles;
+
+        /**
+         * The attributes that are mass assignable.
+         *
+         * @var list<string>
+         */
+        protected $fillable = [
+            'name',
+            'email',
+            'password',
+            'empresa_id',
+            'activo',
         ];
-    }
 
-    public function entradas(){
-        return $this->hasMany(Entrada::class);
-    }
+        /**
+         * The attributes that should be hidden for serialization.
+         *
+         * @var list<string>
+         */
+        protected $hidden = [
+            'password',
+            'remember_token',
+        ];
 
-    public function categorias(){
-        return $this->hasMany(Categoria::class);
-    }
+        /**
+         * Get the attributes that should be cast.
+         *
+         * @return array<string, string>
+         */
+        protected function casts(): array
+        {
+            return [
+                'email_verified_at' => 'datetime',
+                'password' => 'hashed',
+                'activo' => 'boolean',
+            ];
+        }
 
-    public function productos()
-    {
-        return $this->hasManyThrough(Producto::class, Categoria::class);
-    }
+        public function entradas(){
+            return $this->hasMany(Entrada::class);
+        }
 
-}
+        public function empresa()
+        {
+            return $this->belongsTo(Empresa::class);
+        }
+
+        public function cliente()
+        {
+            return $this->hasOne(Cliente::class);
+        }
+
+    }

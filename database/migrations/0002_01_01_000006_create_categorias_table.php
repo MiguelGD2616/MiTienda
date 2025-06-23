@@ -11,18 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('productos', function (Blueprint $table) {
+        Schema::create('categorias', function (Blueprint $table) {
             $table->id();
-            // Relación con Categoría (obligatoria)
-            $table->foreignId('categoria_id')->constrained()->cascadeOnDelete();
-            
-            // Campos del producto
+            $table->foreignId('empresa_id')->constrained()->onDelete('cascade');
             $table->string('nombre');
             $table->text('descripcion')->nullable();
-            $table->decimal('precio', 8, 2);
-            $table->integer('stock')->default(0);
-            $table->string('imagen_url')->nullable(); // Guardará la ruta de la imagen
-            
             $table->timestamps();
         });
     }
@@ -32,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('productos');
+        Schema::dropIfExists('categorias');
     }
 };

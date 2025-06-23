@@ -75,6 +75,7 @@
       integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
       crossorigin="anonymous"
     ></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     @vite(['resources/js/adminlte.js'])
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->

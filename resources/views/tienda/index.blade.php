@@ -1,128 +1,177 @@
 @extends('welcome.app')
+@section('title', 'Tienda de ' . $tienda->nombre)
 
-@section('title', isset($categoriaActual) ? 'Tienda: ' . $categoriaActual->nombre : 'Tienda de ' . $tienda_user->name) {{-- // <-- MEJORA: Título más personalizado --}}
-
+@push('estilos')
+<style>
+    .tienda-header {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?q=80&w=1974&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        color: white;
+    }
+    .product-card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .custom-card { /* Este estilo lo tenías tú, lo mantenemos */
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #fff;
+    }
+    .custom-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+    }
+    .custom-card .img-box {
+        height: 200px;
+        overflow: hidden;
+    }
+    .custom-card .img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .custom-card .custom-content {
+        padding: 1.25rem;
+        text-align: center;
+    }
+    .custom-card h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .custom-card .price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--bs-primary);
+        margin-bottom: 1rem;
+    }
+</style>
+@endpush
 
 @section('contenido')
 <div class="container-contenido">
     
-    <div class="text-center mb-5">
-        @if (isset($categoriaActual))
-            <h1 style="font-family: 'Poppins', sans-serif; font-weight: 900;">Categoría: {{ $categoriaActual->nombre }}</h1>
-            <p class="text-muted">Mostrando productos de la tienda de {{ $tienda_user->name }}</p>
-        @else
-            <h1 style="font-family: 'Poppins', sans-serif; font-weight: 900;">Tienda de {{ $tienda_user->name }}</h1>
-            <p class="text-muted">Explora todos nuestros productos.</p>
-        @endif
+    {{-- Banner de la Tienda --}}
+    <div class="tienda-header text-center p-5 mb-5 rounded shadow-lg">
+        <h1 class="display-4 fw-bold">{{ $tienda->nombre }}</h1>
+        <p class="lead">{{ $tienda->descripcion ?? 'Tu tienda de confianza para encontrar los mejores productos.' }}</p>
     </div>
-
-    <div class="row justify-content-center mb-5">
-        <div class="col-md-8 col-lg-6">
-            <label for="buscador-categoria" class="form-label"><b>Busca una Categoría para filtrar los productos:</b></label>
-            <div class="position-relative">
-                <input type="text" 
-                    id="buscador-categoria" 
-                    class="form-control" 
-                    placeholder="Escribe el nombre de una categoría..."
-                    autocomplete="off"
-                    {{-- // <-- CORRECCIÓN 1: Pasar la URL de búsqueda dinámica al input usando un atributo data-* --}}
-                    data-search-url="{{ route('tienda.buscar', $tienda_user) }}">
-                
-                <div id="resultados-categorias" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
-            </div>
-            
-            <div class="mt-2">
-                {{-- Este enlace ya estaba bien --}}
-                <a href="{{ route('mostrarProductosPublico', $tienda_user) }}" class="btn btn-sm btn-outline-secondary">Ver Todos los Productos</a>
-                @if(isset($categoriaActual))
-                    <span class="ms-2">Mostrando productos de: <b>{{ $categoriaActual->nombre }}</b></span>
-                @endif
-            </div>
+        
+    {{-- Barra de Filtros --}}
+    <div class="card shadow-sm border-0 mb-5 sticky-top" style="top: 1rem; z-index: 1020;">
+        <div class="card-body">
+            <form id="product-filters" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                     <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="fa-solid fa-tags"></i></span>
+                        {{-- El select de categorías ahora tiene un ID para poder manipularlo --}}
+                        <select name="categoria_id" id="categoria_id_filter" class="form-select border-0 bg-light">
+                            <option value="">Todas las categorías</option>
+                            @foreach ($categorias as $categoria)
+                                <option value="{{ $categoria->id }}" {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                    {{ $categoria->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" id="q_filter" name="q" class="form-control border-0 bg-light" placeholder="Buscar producto por nombre..." value="{{ request('q') }}">
+                    </div>
+                </div>
+                <div class="col-md-auto">
+                   <a href="{{ route('tienda.public.index', $tienda) }}" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="fa-solid fa-rotate-left"></i></a>
+                </div>
+            </form>
         </div>
     </div>
-    
-    <div class="card-container">
-        @forelse ($productos as $producto)
-            <div class="custom-card">
-                <div class="img-box">
-                    <img src="{{ $producto->imagen_url ? cloudinary()->image($producto->imagen_url)->toUrl() : 'https://via.placeholder.com/300x220.png?text=Producto' }}" 
-                         alt="Imagen de {{ $producto->nombre }}">
-                </div>
-                <div class="custom-content">
-                    <h2>{{ $producto->nombre }}</h2>
-                    <div class="price">S/.{{ number_format($producto->precio, 2) }}</div>
-                    <a href="#">Ver Detalles</a>
-                </div>
-            </div>
-        @empty
-            <div class="col-12 text-center">
-                @if (isset($categoriaActual))
-                    <h3 class="text-muted">No hay productos en esta categoría.</h3>
-                @else
-                    <h3 class="text-muted">No hay productos para mostrar en este momento.</h3>
-                @endif
-            </div>
-        @endforelse
-    </div>
 
-    <div class="d-flex justify-content-center mt-5">
-        {{ $productos->links() }}
+    {{-- Contenedor principal para productos y paginación --}}
+    <div id="product-list-container">
+        @include('tienda.producto', ['productos' => $productos, 'tienda' => $tienda])
     </div>
-
 </div>
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
+    let searchTimer;
+    const ajaxSearchUrl = "{{ route('tienda.productos.buscar_ajax', $tienda) }}";
 
-    const categoriaUrlTemplate = "{{ route('productos.categoria', ['tienda_user' => $tienda_user, 'categoria' => '__ID__']) }}";
+    function fetchProducts() {
+        const query = $('#q_filter').val();
+        const categoryId = $('#categoria_id_filter').val();
+        const productListContainer = $('#product-list-container');
+        const categorySelect = $('#categoria_id_filter');
 
-    $('#buscador-categoria').on('keyup', function() {
-        let query = $(this).val();
-        let resultadosDiv = $('#resultados-categorias');
-        
-
-        let searchUrl = $(this).data('search-url');
-
-        if (query.length < 2) {
-            resultadosDiv.html('');
-            return;
-        }
+        productListContainer.html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></div>');
 
         $.ajax({
-            url: searchUrl,
-            type: "GET",
-            data: { 'q': query },
-            success: function(data) {
-                resultadosDiv.html('');
-
-                if (data.length === 0) {
-                    resultadosDiv.append('<a href="#" class="list-group-item list-group-item-action disabled">No se encontraron categorías</a>');
-                    return;
-                }
-
-                $.each(data, function(index, categoria) {
-                    // <-- CORRECCIÓN 4: Construir la URL del enlace reemplazando el placeholder
-                    let url = categoriaUrlTemplate.replace('__ID__', categoria.id);
-                    resultadosDiv.append('<a href="' + url + '" class="list-group-item list-group-item-action">' + categoria.nombre + '</a>');
-                });
+            url: ajaxSearchUrl,
+            type: 'GET',
+            data: { 
+                q: query,
+                categoria_id: categoryId
             },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // Es buena práctica manejar errores
-                console.error("Error en la búsqueda:", textStatus, errorThrown);
-                resultadosDiv.html('<a href="#" class="list-group-item list-group-item-action list-group-item-danger">Error al buscar</a>');
+            success: function(response) {
+                // 1. Reemplazar la cuadrícula de productos
+                productListContainer.html(response.products_html);
+
+                // 2. Actualizar las opciones del select de categorías
+                let currentCategorySelection = categorySelect.val(); // Guardar la selección actual
+                categorySelect.empty().append('<option value="">Todas las categorías</option>'); // Limpiar y añadir la opción por defecto
+
+                // 3. Llenar el select con las categorías actualizadas
+                if (response.categories && response.categories.length > 0) {
+                    $.each(response.categories, function(index, category) {
+                        categorySelect.append($('<option>', {
+                            value: category.id,
+                            text: category.nombre
+                        }));
+                    });
+                }
+                
+                // 4. Restaurar la selección si todavía existe
+                categorySelect.val(currentCategorySelection);
+            },
+            error: function() {
+                productListContainer.html('<div class="alert alert-danger text-center">Ocurrió un error al cargar los productos.</div>');
             }
         });
+    }
+
+    // Eventos para disparar la búsqueda
+    $('#q_filter').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(fetchProducts, 500);
     });
 
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#buscador-categoria, #resultados-categorias').length) {
-            $('#resultados-categorias').html('');
-        }
+    $('#categoria_id_filter').on('change', function() {
+        fetchProducts();
+    });
+
+    // Paginación con AJAX (importante: debe delegar el evento al contenedor estático)
+    $('#product-list-container').on('click', '.pagination a', function(event) {
+        event.preventDefault(); 
+        const url = $(this).attr('href');
+        const productListContainer = $('#product-list-container');
+        
+        productListContainer.html('<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>');
+
+        $.get(url, function(data) {
+            productListContainer.html(data.products_html); // Suponiendo que la paginación también devuelve el JSON completo
+        }).fail(function() {
+            productListContainer.html('<div class="alert alert-danger text-center">Error al cargar la página.</div>');
+        });
     });
 });
 </script>
-
 @endpush
 @endsection

@@ -95,4 +95,6 @@ class RoleController extends Controller
 
         return redirect()->route('roles.index')->with('mensaje', $registro->name. ' eliminado correctamente.');
     }
+
+    
 }

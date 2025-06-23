@@ -13,7 +13,7 @@
 
   <!-- Font Awesome 6 (versión free) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+  <script src="//unpkg.com/alpinejs" defer></script>
 
     <!--end::Primary Meta Tags-->
     <!--begin::Fonts-->
@@ -63,35 +63,14 @@
       <!--end::Footer-->
     </div>
     <!--end::App Wrapper-->
-
-    {{-- ======================================================= --}}
-    {{--         HTML DEL MODAL PARA COMPARTIR ENLACE            --}}
-    {{-- (Va aquí, dentro del body, antes de los scripts)        --}}
-    {{-- ======================================================= --}}
-    @auth
-    <div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLinkModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="shareLinkModalLabel"><i class="bi bi-share-fill me-2"></i> ¡Comparte tu Tienda!</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Este es el enlace público a tu tienda. Cópialo y compártelo con tus clientes.</p>
-            <div class="input-group">
-                <input type="text" class="form-control" value="{{ route('mostrarProductosPublico', auth()->user()) }}" id="storeLinkInput" readonly>
-                <button class="btn btn-primary" type="button" id="copyLinkBtn">
-                    <i class="bi bi-clipboard me-1"></i> Copiar
-                </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endauth
-    {{-- ======================================================= --}}
-
-
+    @if(auth()->user()->hasRole('super_admin'))
+        @php
+          $todasLasEmpresas = \App\Models\Empresa::orderBy('nombre')->get();
+        @endphp
+          @include('plantilla.seleccionar', ['empresasParaModal' => $todasLasEmpresas])
+    @endif
+    
+    @include('plantilla.compartir')
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
     <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es6.min.js" integrity="sha256-dghWARbRe2eLlIJ56wNB+b760ywulqK3DzZYEpsg2fQ=" crossorigin="anonymous"></script>
@@ -130,33 +109,6 @@
     <!--end::Script-->
     @stack('scripts')
 
-    {{-- ======================================================= --}}
-    {{--            SCRIPT PARA COPIAR EL ENLACE                 --}}
-    {{-- (Va aquí, al final de todo, para asegurar que      --}}
-    {{-- Bootstrap y el modal ya se hayan cargado)               --}}
-    {{-- ======================================================= --}}
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-          const copyButton = document.getElementById('copyLinkBtn');
-          const linkInput = document.getElementById('storeLinkInput');
-
-          if (copyButton) {
-              copyButton.addEventListener('click', function () {
-                  navigator.clipboard.writeText(linkInput.value).then(function() {
-                      const originalText = copyButton.innerHTML;
-                      copyButton.innerHTML = '<i class="bi bi-check-lg me-1"></i> ¡Copiado!';
-                      setTimeout(function() {
-                          copyButton.innerHTML = originalText;
-                      }, 2000);
-                  }).catch(function(err) {
-                      console.error('Error al intentar copiar el enlace: ', err);
-                      alert('Error al copiar. Por favor, selecciona el texto manualmente.');
-                  });
-              });
-          }
-      });
-    </script>
-    
   </body>
   <!--end::Body-->
 </html>

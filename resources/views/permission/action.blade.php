@@ -1,84 +1,98 @@
-@extends('plantilla.app') {{-- O tu layout principal --}}
+@extends('plantilla.app')
 
-@section('title', $registro->id ? 'Editar Permiso' : 'Crear Permiso')
+@section('titulo', isset($registro) ? 'Editar Permiso' : 'Crear Permiso')
 
-@section('content_header')
-    <h1>{{ $registro->id ? 'Editar Permiso: ' . $registro->name : 'Crear Nuevo Permiso' }}</h1>
-@stop
+@section('contenido')
+<main class="app-main">
+    <div class="container-fluid mt-4">
+    
+        <h2 class="h3 mb-4">
+            <i class="fa-solid {{ isset($registro) ? 'fa-key' : 'fa-plus-square' }} me-2"></i>
+            {{ isset($registro) ? 'Editar Permiso: ' : 'Crear Nuevo Permiso' }}
+        </h2>
 
-@section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h3 class="card-title">{{ $registro->id ? 'Formulario de Edición' : 'Formulario de Creación' }}</h3>
-                </div>
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible">
-                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                            <h5><i class="icon fas fa-ban"></i> ¡Ups! Algo salió mal.</h5>
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+        @if ($errors->any())
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">¡Ups! Revisa los siguientes errores:</h4>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-                    <form method="POST" action="{{ $registro->id ? route('permisos.update', $registro) : route('permisos.store') }}">
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="card shadow-sm border-0">
+                    <form action="{{ isset($registro) ? route('permisos.update', $registro->id) : route('permisos.store') }}" method="POST">
                         @csrf
-                        @if ($registro->id)
+                        @if(isset($registro))
                             @method('PUT')
                         @endif
 
-                        <div class="form-group">
-                            <label for="name">Nombre del Permiso (Slug) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                   id="name" name="name" value="{{ old('name', $registro->name) }}" required
-                                   placeholder="Ej: categoria-list, producto-crear">
-                            @error('name')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                            <small class="form-text text-muted">
-                                Debe ser único y en formato de slug (minúsculas, guiones en lugar de espacios).
-                                Por ejemplo: `nombre-recurso-accion`.
-                            </small>
+                        <div class="card-header bg-white border-0 pt-4 px-4">
+                            <h5 class="card-title mb-0 text-primary"><i class="fa-solid fa-file-signature me-2"></i>Detalles del Permiso</h5>
+                            <small><br>Los campos con <span class="text-danger">*</span> son obligatorios.</small>
                         </div>
-
-                        {{-- Opcional: Campo para Guard Name, generalmente no se necesita cambiar para 'web' --}}
-                        {{--
-                        <div class="form-group">
-                            <label for="guard_name">Guard Name</label>
-                            <input type="text" class="form-control @error('guard_name') is-invalid @enderror"
-                                   id="guard_name" name="guard_name" value="{{ old('guard_name', $registro->guard_name ?? 'web') }}"
-                                   placeholder="web">
-                            @error('guard_name')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                            <small class="form-text text-muted">
-                                Normalmente 'web'. Déjalo en blanco o 'web' para aplicaciones web estándar.
-                            </small>
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nombre del Permiso (Clave) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('name', $registro->name ?? '') }}" 
+                                        placeholder="Ej: producto-listar, usuario-crear" required>
+                                </div>
+                                <small class="form-text text-muted">Debe ser único, en minúsculas y usar el formato `módulo-acción`.</small>
+                                @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                            </div>
                         </div>
-                        --}}
-
-                        <div class="mt-4">
+                        
+                        <div class="card-footer bg-white text-end border-0 pt-0 pb-4 px-4">
+                            <a href="{{ route('permisos.index') }}" class="btn btn-secondary me-2"><i class="fa-solid fa-xmark me-1"></i> Cancelar</a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ $registro->id ? 'Actualizar Permiso' : 'Crear Permiso' }}
+                                <i class="fa-solid fa-floppy-disk me-1"></i> 
+                                {{ isset($registro) ? 'Actualizar Permiso' : 'Guardar Permiso' }}
                             </button>
-                            <a href="{{ route('permisos.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancelar
-                            </a>
                         </div>
                     </form>
                 </div>
             </div>
+            
+            <div class="col-lg-5">
+                <div class="card shadow-sm border-0">
+                     <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i> Panel de Ayuda</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <img src="{{ asset('assets/img/permisos.gif') }}" class="img-fluid" alt="Gestión de permisos" style="max-height: 150px;">
+                        </div>
+                        <h6 class="text-muted"><i class="fa-solid fa-unlock-keyhole text-success me-2"></i>¿Qué es un Permiso?</h6>
+                        <p class="text-muted small">
+                            Un permiso es una acción específica que un usuario puede realizar. Son la base de la seguridad. Los roles agrupan estos permisos para asignarlos fácilmente.
+                        </p>
+                        <hr>
+                        <h6 class="text-muted"><i class="fa-solid fa-lightbulb text-warning me-2"></i>Formato Recomendado</h6>
+                        <p class="text-muted small">
+                            Usa el formato `módulo-acción` para mantener tus permisos organizados.
+                        </p>
+                        <ul class="list-unstyled small text-muted">
+                            <li><i class="fa-solid fa-check text-success"></i> <strong>Bueno:</strong> `producto-listar`</li>
+                            <li><i class="fa-solid fa-times text-danger"></i> <strong>Malo:</strong> `listarproductos`</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</main>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('mnuSeguridad').classList.add('menu-open');
+    document.getElementById('itemPermiso').classList.add('active');
+</script>
+@endpush

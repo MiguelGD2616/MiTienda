@@ -4,132 +4,166 @@ namespace App\Http\Controllers;
 
 use App\Models\Producto;
 use App\Models\Categoria;
+use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+// Si estás usando un Facade específico para Cloudinary, impórtalo.
+// Ejemplo: use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductoController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
-     * Display a listing of the resource.
+     * Muestra la lista de productos del panel de administración.
      */
     public function index(Request $request)
-{
-    $texto = $request->get('texto'); // Solo una vez
-    $userId = auth()->id();
-
-    // Filtramos productos que pertenezcan a categorías del usuario autenticado
-    $productos = Producto::with('categoria')
-        ->whereHas('categoria', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-        ->where('nombre', 'LIKE', '%' . $texto . '%')
-        ->orderBy('id', 'desc')
-        ->paginate(10);
-    
-    // Contamos categorías y las obtenemos para la vista
-    $categoryCount = Categoria::where('user_id', $userId)->count();
-    $categorias = Categoria::where('user_id', $userId)
-        ->orderBy('nombre')
-        ->get();
-    
-    return view('producto.index', compact('productos', 'texto', 'categoryCount', 'categorias'));
-    } 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
     {
-        $categoriaCount = Categoria::count();
+        $this->authorize('producto-list');
+        $user = Auth::user();
+           
+        $query = Producto::with('categoria.empresa');
 
-        // VALIDACIÓN CLAVE: Si no hay categorías, no podemos crear un producto.
-        if ($categoriaCount === 0) {
-            // Redirigimos al listado de categorías con un mensaje de advertencia.
-            return redirect()->route('categorias.index')
-                ->with('warning', '¡Atención! Para crear un producto, primero debe registrar al menos una categoría.');
+        if ($user->hasRole('super_admin')) {
+            if ($request->filled('empresa_id')) {
+                $query->where('empresa_id', $request->empresa_id);
+            }
+        } else {
+            $query->where('empresa_id', $user->empresa_id);
         }
         
-        // Si hay categorías, procedemos normalmente.
-        $categorias = Categoria::orderBy('nombre')->get();
-        return view('producto.create', compact('categorias'));
+        if ($request->filled('texto')) {
+            $query->where('nombre', 'like', '%' . $request->texto . '%');
+        }
+
+        $productos = $query->orderBy('id', 'desc')->paginate(10);
+        $empresas = $user->hasRole('super_admin') ? Empresa::orderBy('nombre')->get() : collect();
+
+        return view('producto.index', compact('productos', 'empresas'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Muestra el formulario para crear un nuevo producto.
+     */
+    public function create()
+    {
+        $this->authorize('producto-create');
+        $user = Auth::user();
+
+        $categorias = collect();
+        $empresas = collect();
+
+        if ($user->hasRole('super_admin')) {
+            $empresas = Empresa::orderBy('nombre')->get();
+            $categorias = Categoria::with('empresa')->orderBy('nombre')->get();
+
+            if ($empresas->isEmpty()) {
+                return redirect()->route('usuarios.create')->with('warning', '¡Atención! Para crear un producto, primero debe registrar al menos una empresa.');
+            }
+        } else { // Si es Admin de Empresa
+            if (!$user->empresa_id) {
+                return redirect()->route('productos.index')->with('error', 'No tienes una empresa asignada para crear productos.');
+            }
+            $categorias = Categoria::where('empresa_id', $user->empresa_id)->orderBy('nombre')->get();
+            
+            if ($categorias->isEmpty()) {
+                return redirect()->route('categorias.create')->with('warning', '¡Atención! Para crear un producto, primero debe registrar al menos una categoría.');
+            }
+        }
+        
+        return view('producto.action', compact('categorias', 'empresas'));
+    }
+
+    /**
+     * Almacena un nuevo producto en la base de datos, incluyendo la imagen en Cloudinary.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $this->authorize('producto-create');
+        $user = Auth::user();
 
-        $productData = $request->except('imagen_url'); // Obtenemos todo menos el archivo
+        $empresa_id = $user->hasRole('super_admin') ? $request->empresa_id : $user->empresa_id;
+        if ($user->hasRole('super_admin')) {
+            $request->validate(['empresa_id' => 'required|exists:empresas,id']);
+        }
+        
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:255', Rule::unique('productos')->where('empresa_id', $empresa_id)],
+            'precio' => 'required|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'categoria_id' => ['required', Rule::exists('categorias', 'id')->where('empresa_id', $empresa_id)],
+            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
+        
+        $productData = $request->except('imagen_url');
+        $productData['empresa_id'] = $empresa_id;
 
         if ($request->hasFile('imagen_url')) {
-            // Subir la imagen a Cloudinary y obtener el Public ID
             $uploadedFile = cloudinary()->uploadApi()->upload($request->file('imagen_url')->getRealPath(), [
                 'folder' => 'productos'
             ]);
-            
-            // Guardamos el "Public ID" que nos da Cloudinary en la base de datos
             $productData['imagen_url'] = $uploadedFile['public_id'];
         }
 
         Producto::create($productData);
 
         return redirect()->route('productos.index')->with('mensaje', 'Producto creado con éxito.');
-
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Producto $producto)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
+     * Muestra el formulario para editar un producto.
      */
     public function edit(Producto $producto)
     {
-        $categorias = Categoria::orderBy('nombre')->get();
-        return view('producto.edit', compact('producto', 'categorias'));
+        $this->authorize('producto-edit', $producto);
+        $user = Auth::user();
+        
+        // Obtenemos las categorías que pertenecen a la misma empresa que el producto.
+        $categorias = Categoria::where('empresa_id', $producto->empresa_id)->orderBy('nombre')->get();
+        
+        // Inicializamos la variable de empresas como una colección vacía.
+        $empresas = collect();
+
+        // SI el usuario es Super Admin, obtenemos TODAS las empresas para el select.
+        if ($user->hasRole('super_admin')) {
+            $empresas = Empresa::orderBy('nombre')->get();
+        }
+
+        // Ahora pasamos TODAS las variables necesarias a la vista.
+        return view('producto.action', compact('producto', 'categorias', 'empresas'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un producto existente, gestionando el cambio de imagen en Cloudinary.
      */
     public function update(Request $request, Producto $producto)
     {
-       $request->validate([
-            'nombre' => 'required|string|max:255',
+        $this->authorize('producto-edit', $producto);
+        $empresa_id = $producto->empresa_id;
+
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:255', Rule::unique('productos')->where('empresa_id', $empresa_id)->ignore($producto->id)],
             'precio' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id',
-            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stock' => 'nullable|integer|min:0',
+            'categoria_id' => ['required', Rule::exists('categorias', 'id')->where('empresa_id', $empresa_id)],
+            'imagen_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-        
+
         $productData = $request->except('imagen_url');
 
         if ($request->hasFile('imagen_url')) {
-            // Borramos la imagen antigua de Cloudinary si existe
             if ($producto->imagen_url) {
                 cloudinary()->uploadApi()->destroy($producto->imagen_url);
             }
-            
-            // Subimos la nueva
-           $uploadedFile = cloudinary()->uploadApi()->upload($request->file('imagen_url')->getRealPath(), [
+            $uploadedFile = cloudinary()->uploadApi()->upload($request->file('imagen_url')->getRealPath(), [
                 'folder' => 'productos'
             ]);
             $productData['imagen_url'] = $uploadedFile['public_id'];
         }
-
 
         $producto->update($productData);
 
@@ -137,13 +171,13 @@ class ProductoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un producto y su imagen asociada en Cloudinary.
      */
+
     public function destroy(Producto $producto)
     {
+        $this->authorize('producto-delete', $producto);
         
-        // Borrar la imagen asociada
-        // Borramos la imagen de Cloudinary si existe
         if ($producto->imagen_url) {
             cloudinary()->uploadApi()->destroy($producto->imagen_url);
         }
@@ -152,97 +186,65 @@ class ProductoController extends Controller
         return redirect()->route('productos.index')->with('mensaje', 'Producto eliminado con éxito.');
     }
 
-     public function listar(Request $request)
-    {
-        // Obtenemos todos los productos para la vista pública
-        $productos = Producto::with('categoria')
-                        ->orderBy('created_at', 'desc')
-                        ->paginate(6); // 6 productos por página
+    // --- MÉTODOS PÚBLICOS (TIENDA) ---
 
-        // Devolvemos la vista de la tienda pública
-        return view('producto.listar', compact('productos'));
-    }
-
-      public function listarPorCategoria(Categoria $categoria)
+    public function mostrarTienda(Empresa $empresa)
     {
-        // Usamos la relación 'productos()' que definimos en el Paso 1
-        $productos = $categoria->productos()->orderBy('created_at', 'desc')->paginate(6);
-        
-        // Obtenemos todas las categorías para el menú de filtros
-        $categorias = Categoria::orderBy('nombre')->get();
-        
-        // Reutilizamos la misma vista, pero pasamos la categoría actual
-        return view('productos.index', [
-            'productos' => $productos,
-            'categorias' => $categorias,
-            'categoriaActual' => $categoria, // Pasamos la categoría seleccionada
-        ]);
-    }
-
-    public function mostrarProductosPublico(User $tienda_user)
-    {
-        // ESTA LÍNEA AHORA FUNCIONARÁ CORRECTAMENTE
-        // Usará la relación 'hasManyThrough' que definimos.
-        $productos = $tienda_user->productos()
-            ->orderBy('productos.created_at', 'desc') // Buena práctica: ser explícito con el nombre de la tabla
-            ->paginate(6);
-        
-        // Esta línea ya funcionaba, porque la relación User->Categorias es directa.
-        // La mejora de 'whereHas' sigue siendo válida y muy recomendable.
-        $categorias = $tienda_user->categorias()
-            ->whereHas('productos')
-            ->orderBy('nombre')
-            ->get();
+        $productos = $empresa->productos()->with('categoria')->paginate(9);
+        $categorias = $empresa->categorias()->whereHas('productos')->get();
         
         return view('tienda.index', [
-            'tienda_user' => $tienda_user,
+            'tienda' => $empresa,
             'productos' => $productos,
             'categorias' => $categorias,
         ]);
     }
 
-    public function filtrarPorCategoriaPublico(User $tienda_user, Categoria $categoria)
+    public function filtrarPorCategoria(Empresa $empresa, Categoria $categoria)
     {
-        // Esta validación es CRUCIAL y ya estaba correcta.
-        // Verifica que la categoría pertenece al usuario de la tienda.
-        if ($categoria->user_id !== $tienda_user->id) {
+        if ($categoria->empresa_id !== $empresa->id) {
             abort(404);
         }
-
-        // Esta parte no cambia, ya que obtiene los productos a partir de la categoría,
-        // lo cual es una relación directa.
-        $productos = $categoria->productos()
-            ->orderBy('created_at', 'desc')
-            ->paginate(6);
         
-        $categorias = $tienda_user->categorias()
+        $productos = $categoria->productos()->paginate(9);
+        $categorias = $empresa->categorias()
+            ->withCount('productos') 
             ->whereHas('productos')
-            ->orderBy('nombre')
             ->get();
         
         return view('tienda.index', [
-            'tienda_user' => $tienda_user,
+            'tienda' => $empresa,
             'productos' => $productos,
             'categorias' => $categorias,
             'categoriaActual' => $categoria,
         ]);
     }
 
-    public function buscarPublico(Request $request, User $tienda_user)
+     public function buscarPublicoAjax(Request $request, Empresa $empresa)
     {
-        $request->validate([
-            'q' => 'required|string|min:1',
+        // --- Lógica de consulta (sin cambios) ---
+        $query = $empresa->productos()->with('categoria');
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+        if ($request->filled('q')) {
+            $query->where('nombre', 'like', '%' . $request->q . '%');
+        }
+        $productos = $query->paginate(12)->appends($request->query());
+
+        // --- Lógica de categorías (ahora también se ejecuta aquí) ---
+        $categoriasParaFiltro = $empresa->categorias()->whereHas('productos')->get();
+
+        // --- Renderizar la vista parcial de productos ---
+        $productsHtml = view('tienda.producto', [
+            'productos' => $productos,
+            'tienda' => $empresa
+        ])->render();
+
+        // --- Devolver una respuesta JSON con ambos datos ---
+        return response()->json([
+            'products_html' => $productsHtml,
+            'categories' => $categoriasParaFiltro
         ]);
-
-        $terminoBusqueda = $request->input('q');
-
-        $categorias = $tienda_user->categorias()
-                                ->where('nombre', 'LIKE', '%' . $terminoBusqueda . '%')
-                                ->select('id', 'nombre')
-                                ->limit(10)
-                                ->get();
-        
-        return response()->json($categorias);
     }
-    
 }

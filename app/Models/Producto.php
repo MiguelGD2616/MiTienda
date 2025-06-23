@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Producto extends Model
 {
-    protected $fillable = [
+   protected $fillable = [
         'categoria_id',
         'nombre',
         'descripcion',
         'precio',
         'stock',
-        'imagen_url', 
+        'imagen_url',
+        'empresa_id',
     ];
 
     public function categoria()
@@ -20,9 +21,9 @@ class Producto extends Model
         return $this->belongsTo(Categoria::class);
     }
 
-    public function user()
+    public function empresa()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Empresa::class);
     }
 
 }
