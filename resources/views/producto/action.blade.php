@@ -135,9 +135,9 @@
 
                             <!-- Fila 4: Subida de Imagen -->
                             <div class="mb-3">
-                                <label for="imagen" class="form-label">Imagen del Producto</label>
-                                <input type="file" class="form-control @error('imagen') is-invalid @enderror" name="imagen" id="imagen" accept="image/*">
-                                @error('imagen') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <label for="imagen_url" class="form-label">Imagen del Producto</label>
+                                <input type="file" class="form-control @error('imagen_url') is-invalid @enderror" name="imagen_url" id="imagen_url" accept="image/*">
+                                @error('imagen_url') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 @isset($producto->imagen_url)
                                     <small class="form-text text-muted">Sube una nueva imagen solo si deseas reemplazar la actual.</small>
                                 @endisset
