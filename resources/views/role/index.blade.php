@@ -60,7 +60,7 @@
                                         </a>
                                     @endcan
                                     @can('rol-delete')
-                                        @if($reg->name != 'super_admin')
+                                        @if(($reg->name != 'super_admin' || auth()->user()->hasRole('super_admin')) )
                                         <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                             data-bs-target="#modal-eliminar-{{ $reg->id }}" title="Eliminar">
                                             <i class="fa-solid fa-trash-can"></i>

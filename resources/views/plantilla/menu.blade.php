@@ -82,7 +82,7 @@
                         @endcan
 
                         @can('pedido-list')
-                             <a href="{{ route('pedidos.index') }}" class="nav-link {{ request()->routeIs('pedidos.index') ? 'active-item' : $colorTexto }}"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Pedidos</a>
+                            <a href="{{ route('pedidos.index') }}" class="nav-link {{ request()->routeIs('pedidos.index') ? 'active-item' : $colorTexto }}"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Pedidos</a>
                         @endcan
 
                         @if(auth()->user()->hasRole('super_admin'))
