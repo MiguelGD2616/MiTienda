@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://<tu-nombre-de-app>.onrender.com
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: shuttle.proxy.rlwy.net
+      - key: DB_PORT
+        value: 34864
+      - key: DB_DATABASE
+        value: railway
+      - key: DB_USERNAME
+        value: root
+      - key: DB_PASSWORD
+        value: XdDljSahnaGMQVbIPDzXheCXSJIpRtPl
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: FILESYSTEM_DISK
+        value: cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dez3kxlkt
+      - key: CLOUDINARY_API_KEY
+        value: 639922212455988
+      - key: CLOUDINARY_API_SECRET
+        value: JbRb59EMYBvM0oPU1lEn_fIOoP0
