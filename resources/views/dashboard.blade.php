@@ -112,7 +112,6 @@
 
         @elseif(auth()->user()->hasRole('admin'))
             @if(auth()->user()->empresa)
-                <!-- Cabecera Admin -->
                 <div class="dashboard-header">
                     <div class="d-flex align-items-center">
                         <div class="logo-icon"><i class="fas fa-store"></i></div>
