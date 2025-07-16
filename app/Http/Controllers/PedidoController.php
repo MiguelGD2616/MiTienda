@@ -53,7 +53,7 @@ class PedidoController extends Controller
         
         $pedidos = $query->paginate(15)->appends($request->query());
         $empresas = $user->hasRole('super_admin') ? Empresa::orderBy('nombre')->get() : collect();
-        $estados = ['pendiente', 'atendido', 'procesando', 'enviado', 'entregado', 'completado', 'cancelado'];
+        $estados = ['pendiente', 'atendido',  'enviado', 'entregado', 'cancelado'];
 
         // Guardamos los filtros en la sesión para el botón "Volver"
         session(['pedido_filters' => $request->query()]);

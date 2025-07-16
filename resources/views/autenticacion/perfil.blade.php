@@ -75,10 +75,24 @@
                                             id="empresa_telefono_whatsapp" name="empresa_telefono_whatsapp" value="{{ old('empresa_telefono_whatsapp', $empresa->telefono_whatsapp) }}">
                                         @error('empresa_telefono_whatsapp') <small class="text-danger">{{$message}}</small> @enderror
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="empresa_logo" class="form-label">Logo</label>
-                                        <input type="file" class="form-control @error('empresa_logo') is-invalid @enderror" id="empresa_logo" name="empresa_logo">
-                                        @error('empresa_logo') <small class="text-danger">{{$message}}</small> @enderror
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="empresa_logo" class="form-label">Logo de la Empresa</label>
+                                            <input type="file" class="form-control @error('empresa_logo') is-invalid @enderror" id="empresa_logo" name="empresa_logo" accept="image/*">
+                                            @error('empresa_logo') <small class="text-danger">{{$message}}</small> @enderror
+                                            <small class="form-text text-muted">Sube un nuevo logo solo si deseas reemplazar el actual.</small>
+                                        </div>
+
+                                        {{-- NUEVO: Sección para mostrar el logo actual --}}
+                                        @if(isset($empresa) && $empresa->logo_url)
+                                            <div class="col-md-6 mb-3">
+                                                <label>Logo Actual:</label><br>
+                                                <img src="{{ cloudinary()->image($empresa->logo_url)->toUrl() }}"
+                                                    alt="Logo de {{ $empresa->nombre }}" 
+                                                    class="img-thumbnail"
+                                                    style="max-width: 150px; max-height: 150px;">
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endif

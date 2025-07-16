@@ -52,12 +52,14 @@ class PerfilController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
         ];
         
+        // Reglas para admin/super_admin con empresa
         if ($user->hasRole(['super_admin', 'admin']) && $user->empresa) {
             $rules['empresa_nombre'] = ['required', 'string', 'max:255', Rule::unique('empresas', 'nombre')->ignore($user->empresa_id)];
             $rules['empresa_rubro'] = 'nullable|string|max:255';
             $rules['empresa_telefono_whatsapp'] = 'nullable|string|max:20';
-            $rules['empresa_logo'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+            $rules['empresa_logo'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'; // La regla ya estaba, ¡perfecto!
         }
+        // Reglas para cliente
         elseif ($user->hasRole('cliente')) {
             $rules['cliente_telefono'] = 'nullable|string|max:20';
         }
@@ -65,10 +67,9 @@ class PerfilController extends Controller
         $validatedData = $request->validate($rules);
 
         // --- ACTUALIZACIÓN DE DATOS ---
-        // Usamos una transacción por si la actualización de la empresa falla.
         DB::beginTransaction();
         try {
-            // 2. Actualizar el modelo User (común para todos)
+            // 1. Actualizar el modelo User (común para todos)
             $user->name = $validatedData['name'];
             $user->email = $validatedData['email'];
             if ($request->filled('password')) {
@@ -76,19 +77,34 @@ class PerfilController extends Controller
             }
             $user->save();
 
-            // 3. Actualizar la Empresa si es un Admin
+            // 2. Actualizar la Empresa si es un Admin/SuperAdmin
             if ($user->hasRole(['super_admin', 'admin']) && $user->empresa) {
-                $user->empresa->update([
+                $empresa = $user->empresa; // Obtenemos el modelo de la empresa
+                
+                $empresaData = [
                     'nombre' => $validatedData['empresa_nombre'],
                     'rubro' => $request->input('empresa_rubro'),
                     'telefono_whatsapp' => $request->input('empresa_telefono_whatsapp'),
-                ]);
+                ];
                 
+                // --- LÓGICA DEL LOGO (la parte importante que faltaba) ---
                 if ($request->hasFile('empresa_logo')) {
-                    // Lógica para borrar logo antiguo y subir el nuevo...
+                    // Si ya existe un logo, lo eliminamos de Cloudinary
+                    if ($empresa->logo_url) {
+                        cloudinary()->uploadApi()->destroy($empresa->logo_url);
+                    }
+                    
+                    // Subimos el nuevo logo a una carpeta 'logos_empresa'
+                    $uploadedFile = cloudinary()->uploadApi()->upload($request->file('empresa_logo')->getRealPath(), [
+                        'folder' => 'logos_empresa'
+                    ]);
+                    // Guardamos el public_id que nos devuelve Cloudinary
+                    $empresaData['logo_url'] = $uploadedFile['public_id'];
                 }
+
+                $empresa->update($empresaData); // Actualizamos la empresa con todos los datos
             } 
-            // 4. Actualizar el Cliente si es un Cliente
+            // 3. Actualizar el Cliente si es un Cliente
             elseif ($user->hasRole('cliente') && $user->cliente) {
                 $user->cliente->update([
                     'nombre' => $validatedData['name'], // Sincronizamos el nombre

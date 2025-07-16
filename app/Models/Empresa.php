@@ -5,8 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Empresa extends Model
+
 {
-    protected $fillable = ['nombre', 'slug', 'rubro','telefono_whatsapp'];
+    protected $fillable = ['nombre', 'slug', 'rubro','telefono_whatsapp','logo_url'];
 
     public function usuarios()
     {
@@ -25,7 +26,7 @@ class Empresa extends Model
 
     public function clientes()
     {
-        return $this->belongsToMany(Cliente::class, 'cliente_empresa');
+        return $this->belongsToMany(Cliente::class, 'cliente_empresa')->withTimestamps();
     }
 
     public function pedidos()

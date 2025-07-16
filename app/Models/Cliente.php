@@ -15,7 +15,8 @@ class Cliente extends Model
 
     public function empresas()
     {
-        return $this->belongsToMany(Empresa::class, 'cliente_empresa');
+        return $this->belongsToMany(Empresa::class, 'cliente_empresa')->withTimestamps();
+
     }
 
     public function pedidos()

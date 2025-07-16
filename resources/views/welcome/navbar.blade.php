@@ -60,7 +60,7 @@
                             <i class="fa-solid fa-circle-user"></i> {{ Auth::user()->name }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-right text-capitalize">
-                            <a href="{{ route('perfil.edit2') }}" class="dropdown-item">Mi Perfil</a>
+                            <a href="{{ route('perfil.edit') }}" class="dropdown-item">Mi Perfil</a>
                             @if(auth()->user()->hasRole('cliente'))
                             <li>
                                 <a class="dropdown-item" href="{{ route('pedidos.index') }}">

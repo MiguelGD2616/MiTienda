@@ -135,7 +135,7 @@
                            <div class="input-group">
                                <select name="estado" id="estado" class="form-select" x-model="estadoSeleccionado"
                                        @if(in_array($pedido->estado, ['completado', 'cancelado'])) disabled @endif>
-                                   @foreach(['pendiente', 'atendido', 'procesando', 'enviado', 'entregado', 'completado', 'cancelado'] as $estado)
+                                   @foreach(['pendiente', 'atendido', 'enviado', 'entregado'] as $estado)
                                        <option value="{{ $estado }}" {{ $pedido->estado == $estado ? 'selected' : '' }}>
                                            {{ ucfirst($estado) }}
                                        </option>

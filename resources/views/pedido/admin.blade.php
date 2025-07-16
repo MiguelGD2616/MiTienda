@@ -85,10 +85,8 @@
                                             @switch($pedido->estado)
                                                 @case('pendiente') bg-warning text-dark @break
                                                 @case('atendido') bg-info text-dark @break
-                                                @case('procesando') bg-primary @break
                                                 @case('enviado') bg-dark @break
                                                 @case('entregado') bg-success @break
-                                                @case('completado') bg-success @break
                                                 @case('cancelado') bg-danger @break
                                                 @default bg-secondary
                                             @endswitch
