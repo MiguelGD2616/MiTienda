@@ -162,7 +162,6 @@
 
              <hr class="my-4">
 
-            {{-- Widget de Gráfico de Ingresos --}}
             <div>
                  <h5 class="card-title-custom">
                      @if(auth()->user()->hasRole('super_admin')) Ingresos (Últimos 15 días) @else Tus Ingresos (Últimos 15 días) @endif
