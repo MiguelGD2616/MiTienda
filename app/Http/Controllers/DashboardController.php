@@ -115,10 +115,8 @@ class DashboardController extends Controller
                 return $cliente->user;
             }
             return null;
-        })->filter(); // filter() elimina cualquier resultado nulo.
-
-        // === FIN DE LA LÓGICA CORREGIDA ===
-
+        })->filter(); 
+        
         return [
             'kpi' => $statusCounts,
             'totalPedidos' => $totalPedidos,
